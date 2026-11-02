@@ -82,3 +82,6 @@ It allows accountants to enter daily sales across multiple channels (Cash, UPI, 
   - Non-blocking discrepancies should be treated as warnings, whereas invalid business dates and negative cash amounts produce blocking validation errors.
 - **Print / PDF Layout Consistency**:
   - Ensure any new UI elements added to [`DailySnapshotReport.tsx`](file:///src/components/snapshot/DailySnapshotReport.tsx) respect `@media print` rules in [`App.css`](file:///src/App.css), fitting cleanly on standard A4 paper without pagination clipping.
+- **Decision Log (decision.md) Requirement**:
+  - Always update [decision.md](file:///decision.md) whenever changes are made to existing code, database schemas, or architectural workflows.
+  - Document the entry with Date, Reason, and a concise 1-2 line summary of the change.

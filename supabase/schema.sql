@@ -43,6 +43,7 @@ CREATE TABLE IF NOT EXISTS public.daily_statements (
     total_expenses_paise BIGINT NOT NULL DEFAULT 0,
     total_cash_memos_paise BIGINT NOT NULL DEFAULT 0,
     net_difference_paise BIGINT NOT NULL DEFAULT 0,
+    cash_in_hand_paise BIGINT NOT NULL DEFAULT 0,
     
     -- Optional fields from paper statement comparison
     entered_account_sales_paise BIGINT,
