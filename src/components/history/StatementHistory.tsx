@@ -28,7 +28,7 @@ export const StatementHistory: React.FC<StatementHistoryProps> = ({
   onDeleteStatement,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'ALL' | 'DRAFT' | 'FINALIZED'>('ALL');
+  const [statusFilter, setStatusFilter] = useState<'ALL' | 'FINALIZED' | 'DRAFT'>('ALL');
 
   const filteredStatements = statements.filter(stmt => {
     const matchesQuery =
@@ -88,15 +88,10 @@ export const StatementHistory: React.FC<StatementHistoryProps> = ({
   return (
     <div className="max-w-6xl mx-auto pb-16">
       <div className="bg-white rounded-xl shadow-xs border border-slate-200 p-4 sm:p-6 mb-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
-          <div>
-            <h1 className="text-xl font-black text-slate-900 tracking-tight m-0">
-              Statement History & Archives
-            </h1>
-            <p className="text-xs text-slate-500 mt-0.5 m-0">
-              View, edit, duplicate, and export all recorded daily statements
-            </p>
-          </div>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+          <h1 className="text-xl font-black text-slate-900 tracking-tight m-0">
+            Statement History
+          </h1>
 
           <button
             type="button"
@@ -116,7 +111,7 @@ export const StatementHistory: React.FC<StatementHistoryProps> = ({
               type="text"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Search by date (YYYY-MM-DD), statement #, or remarks..."
+              placeholder="Search date, statement #, or notes..."
               className="w-full pl-9 pr-3 py-2 bg-slate-50 text-xs rounded-lg border border-slate-200 focus:outline-none focus:bg-white focus:ring-1 focus:ring-amber-500"
             />
           </div>
@@ -148,8 +143,8 @@ export const StatementHistory: React.FC<StatementHistoryProps> = ({
           <h2 className="text-sm font-bold text-slate-800 m-0">No statements found</h2>
           <p className="text-xs text-slate-500 mt-1 m-0">
             {statements.length === 0
-              ? 'Complete and save your first daily cash statement in the Daily Entry tab.'
-              : 'Try clearing your search or filter criteria.'}
+              ? 'Complete and save your first daily statement in the Daily Entry tab.'
+              : 'Try clearing your search or filter.'}
           </p>
         </div>
       ) : (
@@ -186,7 +181,7 @@ export const StatementHistory: React.FC<StatementHistoryProps> = ({
                       day: 'numeric',
                     })}
                   </span>
-                  <span>{stmt.expense_entries?.length || 0} expenses recorded</span>
+                  <span>{stmt.expense_entries?.length || 0} expenses</span>
                 </div>
 
                 {stmt.notes && (
@@ -224,7 +219,7 @@ export const StatementHistory: React.FC<StatementHistoryProps> = ({
                   type="button"
                   onClick={() => onViewSnapshot(stmt)}
                   className="p-2 text-slate-600 hover:text-amber-700 hover:bg-amber-50 rounded-lg transition-colors"
-                  title="Print / View Snapshot"
+                  title="Print Snapshot"
                 >
                   <FileText className="w-4 h-4" />
                 </button>
@@ -242,7 +237,7 @@ export const StatementHistory: React.FC<StatementHistoryProps> = ({
                   type="button"
                   onClick={() => onDuplicateStatement(stmt)}
                   className="p-2 text-slate-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition-colors"
-                  title="Duplicate expense items to a new statement for today"
+                  title="Duplicate for today"
                 >
                   <Copy className="w-4 h-4" />
                 </button>

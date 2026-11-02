@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import type { ExpenseItem, ExpenseCategory } from '../../types/statement';
 import { paiseToRupees, rupeesToPaise, formatPaiseToINR, calculateTotalExpenses } from '../../lib/calculations';
 import { generateUuid, saveExpenseCategory, deleteExpenseCategory } from '../../lib/supabase';
-import { ShoppingBag, Plus, Trash2, Tag, AlertCircle, FolderPlus, X } from 'lucide-react';
+import { ShoppingBag, Plus, Trash2, Tag, X } from 'lucide-react';
 
 interface ExpensesSectionProps {
   expenses: ExpenseItem[];
@@ -10,8 +10,6 @@ interface ExpensesSectionProps {
   onChange: (updated: ExpenseItem[]) => void;
   onAddCategory?: (newCategory: ExpenseCategory) => void;
   onRemoveCategory?: (categoryId: string) => void;
-  enteredAccountExpensesPaise?: number;
-  onEnteredAccountExpensesChange?: (val: number | undefined) => void;
 }
 
 export const ExpensesSection: React.FC<ExpensesSectionProps> = ({
@@ -20,8 +18,6 @@ export const ExpensesSection: React.FC<ExpensesSectionProps> = ({
   onChange,
   onAddCategory,
   onRemoveCategory,
-  enteredAccountExpensesPaise,
-  onEnteredAccountExpensesChange,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>(
     categories[0]?.name || 'Vegetables / Mandi'
@@ -29,13 +25,16 @@ export const ExpensesSection: React.FC<ExpensesSectionProps> = ({
   const [newDescription, setNewDescription] = useState<string>('');
   const [newAmount, setNewAmount] = useState<string>('');
 
-  // Custom Category Creation State
+  // Custom Category Creation State (Triggered exclusively via dropdown)
   const [isAddingCategory, setIsAddingCategory] = useState<boolean>(false);
   const [newCategoryName, setNewCategoryName] = useState<string>('');
   const [categoryError, setCategoryError] = useState<string | null>(null);
   const [isSavingCategory, setIsSavingCategory] = useState<boolean>(false);
 
   const totalExpensesPaise = calculateTotalExpenses(expenses);
+
+  // Show top 5 quick-add options (within the 3-6 range) to prevent clutter
+  const quickAddCategories = categories.slice(0, 5);
 
   const handleCreateCategory = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -119,89 +118,75 @@ export const ExpensesSection: React.FC<ExpensesSectionProps> = ({
   return (
     <div className="bg-white rounded-xl shadow-xs border border-slate-200 p-4 sm:p-6 mb-6">
       {/* Section Header */}
-      <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+      <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
         <div className="flex items-center space-x-2">
           <div className="p-1.5 rounded-md bg-rose-50 text-rose-600">
             <ShoppingBag className="w-5 h-5" />
           </div>
-          <div>
-            <h2 className="text-base font-bold text-slate-900 m-0">3. Daily Expenses & Outflows</h2>
-            <p className="text-xs text-slate-500 m-0 mt-0.5">
-              Itemize raw materials, gas, wages, and cash expenses
-            </p>
-          </div>
+          <h2 className="text-base font-bold text-slate-900 m-0">3. Daily Expenses</h2>
         </div>
         <div className="text-right">
-          <span className="text-xs text-slate-400 font-medium block">Total Expenses</span>
-          <span className="text-lg font-black text-rose-700 tracking-tight">
+          <span className="text-2xs text-slate-400 font-medium uppercase tracking-wider block">Total Expenses</span>
+          <span className="text-base sm:text-lg font-black text-rose-700 tracking-tight">
             {formatPaiseToINR(totalExpensesPaise)}
           </span>
         </div>
       </div>
 
-      {/* Quick Add Pills & Custom Category Trigger */}
+      {/* Collapsible Create Custom Category Form (Triggered via dropdown "+ New Category...") */}
+      {isAddingCategory && (
+        <form
+          onSubmit={handleCreateCategory}
+          className="mb-4 p-3 bg-rose-50/70 border border-rose-200 rounded-lg flex flex-col sm:flex-row items-stretch sm:items-center gap-2 animate-fade-in"
+        >
+          <div className="flex-1">
+            <input
+              type="text"
+              value={newCategoryName}
+              onChange={e => {
+                setNewCategoryName(e.target.value);
+                if (categoryError) setCategoryError(null);
+              }}
+              placeholder="Enter new category name..."
+              className="w-full px-3 py-1.5 text-xs bg-white rounded border border-rose-300 font-medium text-slate-900 focus:outline-none focus:ring-1 focus:ring-rose-500"
+              autoFocus
+            />
+          </div>
+          <div className="flex items-center space-x-2">
+            <button
+              type="submit"
+              disabled={isSavingCategory}
+              className="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded text-xs font-bold transition-colors disabled:opacity-50"
+            >
+              {isSavingCategory ? 'Saving...' : 'Save'}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setIsAddingCategory(false);
+                setCategoryError(null);
+                setSelectedCategory(categories[0]?.name || '');
+              }}
+              className="px-2.5 py-1.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded text-xs font-semibold"
+            >
+              Cancel
+            </button>
+          </div>
+          {categoryError && (
+            <p className="w-full text-2xs font-bold text-rose-600 m-0">{categoryError}</p>
+          )}
+        </form>
+      )}
+
+      {/* Quick Add Pills */}
       <div className="mb-4">
-        <div className="flex items-center justify-between mb-1.5">
-          <label className="block text-2xs font-semibold uppercase tracking-wider text-slate-500">
-            Quick-Add Category from Cash Book:
-          </label>
-          <button
-            type="button"
-            onClick={() => setIsAddingCategory(prev => !prev)}
-            className="inline-flex items-center text-xs font-bold text-rose-600 hover:text-rose-700 hover:underline transition-colors"
-          >
-            <FolderPlus className="w-3.5 h-3.5 mr-1" />
-            {isAddingCategory ? 'Close' : '+ Add Custom Category'}
-          </button>
-        </div>
+        <label className="block text-2xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
+          Quick Add:
+        </label>
 
-        {/* Collapsible Create Custom Category Form */}
-        {isAddingCategory && (
-          <form
-            onSubmit={handleCreateCategory}
-            className="mb-3 p-3 bg-rose-50/70 border border-rose-200 rounded-lg flex flex-col sm:flex-row items-stretch sm:items-center gap-2 animate-fade-in"
-          >
-            <div className="flex-1">
-              <input
-                type="text"
-                value={newCategoryName}
-                onChange={e => {
-                  setNewCategoryName(e.target.value);
-                  if (categoryError) setCategoryError(null);
-                }}
-                placeholder="New Category Name (e.g. Generator Fuel, Rent, Pooja Expenses)"
-                className="w-full px-3 py-1.5 text-xs bg-white rounded border border-rose-300 font-medium text-slate-900 focus:outline-none focus:ring-1 focus:ring-rose-500"
-                autoFocus
-              />
-            </div>
-            <div className="flex items-center space-x-2">
-              <button
-                type="submit"
-                disabled={isSavingCategory}
-                className="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded text-xs font-bold transition-colors disabled:opacity-50"
-              >
-                {isSavingCategory ? 'Saving...' : 'Save Category'}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setIsAddingCategory(false);
-                  setCategoryError(null);
-                }}
-                className="px-2.5 py-1.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded text-xs font-semibold"
-              >
-                Cancel
-              </button>
-            </div>
-            {categoryError && (
-              <p className="w-full text-2xs font-bold text-rose-600 m-0">{categoryError}</p>
-            )}
-          </form>
-        )}
-
-        {/* Quick Add Badges */}
+        {/* Quick Add Badges (Limited to top 5 categories) */}
         <div className="flex flex-wrap gap-1.5">
-          {categories.map(cat => (
+          {quickAddCategories.map(cat => (
             <div key={cat.id} className="inline-flex items-center">
               <button
                 type="button"
@@ -218,7 +203,7 @@ export const ExpensesSection: React.FC<ExpensesSectionProps> = ({
                   <span
                     onClick={e => handleDeleteCustomCategory(cat, e)}
                     className="ml-1.5 p-0.5 rounded-full hover:bg-rose-200 text-rose-500 hover:text-rose-800"
-                    title="Delete custom category"
+                    title="Delete category"
                   >
                     <X className="w-2.5 h-2.5" />
                   </span>
@@ -234,11 +219,12 @@ export const ExpensesSection: React.FC<ExpensesSectionProps> = ({
         <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center">
           <div className="sm:col-span-4">
             <select
-              value={selectedCategory}
+              value={isAddingCategory ? '__NEW__' : selectedCategory}
               onChange={e => {
                 if (e.target.value === '__NEW__') {
                   setIsAddingCategory(true);
                 } else {
+                  setIsAddingCategory(false);
                   setSelectedCategory(e.target.value);
                 }
               }}
@@ -249,7 +235,7 @@ export const ExpensesSection: React.FC<ExpensesSectionProps> = ({
                   {cat.name} {!cat.is_predefined ? '(Custom)' : ''}
                 </option>
               ))}
-              <option value="__NEW__">+ Add Custom Category...</option>
+              <option value="__NEW__">+ New Category...</option>
             </select>
           </div>
 
@@ -258,7 +244,7 @@ export const ExpensesSection: React.FC<ExpensesSectionProps> = ({
               type="text"
               value={newDescription}
               onChange={e => setNewDescription(e.target.value)}
-              placeholder="Description (e.g. Mandi vegetables, Cylinder)"
+              placeholder="Description (optional)"
               className="w-full px-2.5 py-2 bg-white text-xs rounded border border-slate-300 font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-rose-500"
             />
           </div>
@@ -295,7 +281,7 @@ export const ExpensesSection: React.FC<ExpensesSectionProps> = ({
       {/* Itemized List */}
       {expenses.length === 0 ? (
         <div className="text-center py-6 border-2 border-dashed border-slate-200 rounded-lg">
-          <p className="text-xs text-slate-500">No expenses recorded for this statement</p>
+          <p className="text-xs text-slate-500 m-0">No expenses recorded</p>
         </div>
       ) : (
         <div className="divide-y divide-slate-100 border border-slate-200 rounded-lg overflow-hidden bg-white">
@@ -353,45 +339,6 @@ export const ExpensesSection: React.FC<ExpensesSectionProps> = ({
           ))}
         </div>
       )}
-
-      {/* Optional Paper Written Total */}
-      <div className="mt-4 pt-3 border-t border-dashed border-slate-200">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <span className="text-xs text-slate-500">
-            Optional Paper Written Expense Total:
-          </span>
-          <div className="flex items-center space-x-2">
-            <div className="relative w-36">
-              <span className="absolute inset-y-0 left-0 pl-2.5 flex items-center text-slate-400 text-xs font-semibold pointer-events-none">
-                ₹
-              </span>
-              <input
-                type="number"
-                inputMode="decimal"
-                value={
-                  enteredAccountExpensesPaise !== undefined && enteredAccountExpensesPaise > 0
-                    ? paiseToRupees(enteredAccountExpensesPaise)
-                    : ''
-                }
-                onChange={e => {
-                  const val = e.target.value ? rupeesToPaise(e.target.value) : undefined;
-                  onEnteredAccountExpensesChange?.(val);
-                }}
-                placeholder="From paper"
-                className="w-full pl-6 pr-2 py-1 text-xs bg-slate-50 rounded border border-slate-200 text-slate-700 font-medium focus:outline-none focus:bg-white"
-              />
-            </div>
-            {enteredAccountExpensesPaise !== undefined &&
-              enteredAccountExpensesPaise > 0 &&
-              enteredAccountExpensesPaise !== totalExpensesPaise && (
-                <span className="inline-flex items-center text-xs font-medium text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                  <AlertCircle className="w-3 h-3 mr-1" />
-                  Diff: {formatPaiseToINR(Math.abs(enteredAccountExpensesPaise - totalExpensesPaise))}
-                </span>
-              )}
-          </div>
-        </div>
-      </div>
     </div>
   );
 };

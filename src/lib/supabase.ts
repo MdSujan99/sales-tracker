@@ -77,16 +77,16 @@ const LOCAL_STORAGE_CATEGORIES_KEY = 'restaurant_expense_categories_v1';
 
 export const DEFAULT_CATEGORIES: ExpenseCategory[] = [
   { id: '11111111-0000-0000-0000-000000000001', name: 'Vegetables / Mandi', display_order: 1, is_active: true, is_predefined: true },
-  { id: '11111111-0000-0000-0000-000000000002', name: 'Meat / Poultry / Fish', display_order: 2, is_active: true, is_predefined: true },
-  { id: '11111111-0000-0000-0000-000000000003', name: 'Dairy / Milk / Paneer', display_order: 3, is_active: true, is_predefined: true },
-  { id: '11111111-0000-0000-0000-000000000004', name: 'Bakery / Breads', display_order: 4, is_active: true, is_predefined: true },
-  { id: '11111111-0000-0000-0000-000000000005', name: 'Gas / Commercial Cylinders', display_order: 5, is_active: true, is_predefined: true },
-  { id: '11111111-0000-0000-0000-000000000006', name: 'Packaging & Disposables', display_order: 6, is_active: true, is_predefined: true },
-  { id: '11111111-0000-0000-0000-000000000007', name: 'Daily Wages / Labour', display_order: 7, is_active: true, is_predefined: true },
-  { id: '11111111-0000-0000-0000-000000000008', name: 'Maintenance & Repairs', display_order: 8, is_active: true, is_predefined: true },
-  { id: '11111111-0000-0000-0000-000000000009', name: 'Cleaning & Sanitation', display_order: 9, is_active: true, is_predefined: true },
-  { id: '11111111-0000-0000-0000-000000000010', name: 'Ice & Beverages', display_order: 10, is_active: true, is_predefined: true },
-  { id: '11111111-0000-0000-0000-000000000011', name: 'Staff Tea & Refreshment', display_order: 11, is_active: true, is_predefined: true },
+  { id: '11111111-0000-0000-0000-000000000002', name: 'Dairy / Milk / Paneer', display_order: 2, is_active: true, is_predefined: true },
+  { id: '11111111-0000-0000-0000-000000000003', name: 'Meat / Poultry / Fish', display_order: 3, is_active: true, is_predefined: true },
+  { id: '11111111-0000-0000-0000-000000000004', name: 'Gas / Commercial Cylinders', display_order: 4, is_active: true, is_predefined: true },
+  { id: '11111111-0000-0000-0000-000000000005', name: 'Daily Wages / Labour', display_order: 5, is_active: true, is_predefined: true },
+  { id: '11111111-0000-0000-0000-000000000006', name: 'Staff Tea & Refreshment', display_order: 6, is_active: true, is_predefined: true },
+  { id: '11111111-0000-0000-0000-000000000007', name: 'Bakery / Breads', display_order: 7, is_active: true, is_predefined: true },
+  { id: '11111111-0000-0000-0000-000000000008', name: 'Packaging & Disposables', display_order: 8, is_active: true, is_predefined: true },
+  { id: '11111111-0000-0000-0000-000000000009', name: 'Maintenance & Repairs', display_order: 9, is_active: true, is_predefined: true },
+  { id: '11111111-0000-0000-0000-000000000010', name: 'Cleaning & Sanitation', display_order: 10, is_active: true, is_predefined: true },
+  { id: '11111111-0000-0000-0000-000000000011', name: 'Ice & Beverages', display_order: 11, is_active: true, is_predefined: true },
   { id: '11111111-0000-0000-0000-000000000012', name: 'Miscellaneous Cash Expenses', display_order: 12, is_active: true, is_predefined: true },
 ];
 
@@ -164,7 +164,7 @@ export async function saveExpenseCategory(name: string): Promise<ExpenseCategory
     is_predefined: false,
   };
 
-  const updatedCategories = [...currentCategories, newCat];
+  const updatedCategories = [newCat, ...currentCategories];
   localStorage.setItem(LOCAL_STORAGE_CATEGORIES_KEY, JSON.stringify(updatedCategories));
 
   // If Supabase is connected, persist to remote DB

@@ -127,7 +127,7 @@ const MainApp: React.FC = () => {
   const handleAddCategory = (newCat: ExpenseCategory) => {
     setCategories(prev => {
       if (prev.some(c => c.id === newCat.id)) return prev;
-      return [...prev, newCat];
+      return [newCat, ...prev];
     });
   };
 

@@ -30,7 +30,7 @@ export const DailySnapshotReport: React.FC<DailySnapshotReportProps> = ({
 
   return (
     <div className="max-w-4xl mx-auto pb-16">
-      {/* Control Action Bar (Screen Only - Hidden in Print) */}
+      {/* Control Action Bar */}
       <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs mb-6 flex flex-wrap items-center justify-between gap-3 no-print">
         <button
           type="button"
@@ -62,9 +62,7 @@ export const DailySnapshotReport: React.FC<DailySnapshotReportProps> = ({
         </div>
       </div>
 
-      {/* ============================================================== */}
       {/* PRINTABLE A4 STATEMENT SHEET */}
-      {/* ============================================================== */}
       <div className="bg-white p-6 sm:p-10 rounded-xl shadow-xs border border-slate-200 print:border-0 print:p-0 print:shadow-none print-card">
         {/* Statement Header */}
         <div className="border-b-2 border-slate-900 pb-4 mb-6 text-center">
@@ -108,33 +106,33 @@ export const DailySnapshotReport: React.FC<DailySnapshotReportProps> = ({
             <tbody>
               <tr className="bg-amber-50/70 font-black border-b border-amber-200 print:bg-slate-100">
                 <td className="p-2 text-amber-950 uppercase font-black">
-                  Total Daily Sales (Register / POS Grand Total)
+                  Total Daily Sales
                 </td>
                 <td className="p-2 text-right text-amber-950 text-sm font-black">
                   {formatPaiseToINR(statement.total_sales_paise)}
                 </td>
               </tr>
               <tr className="bg-slate-50/50">
-                <td className="p-2 font-medium text-slate-700">Online Delivery (Zomato / Swiggy)</td>
+                <td className="p-2 font-medium text-slate-700">Online Delivery</td>
                 <td className="p-2 text-right font-bold text-slate-900">
                   {formatPaiseToINR(statement.delivery_sales_paise)}
                 </td>
               </tr>
               <tr>
-                <td className="p-2 font-medium text-slate-700">Card / POS Settlements</td>
+                <td className="p-2 font-medium text-slate-700">Card</td>
                 <td className="p-2 text-right font-bold text-slate-900">
                   {formatPaiseToINR(statement.card_sales_paise)}
                 </td>
               </tr>
               <tr className="bg-slate-50/50">
-                <td className="p-2 font-medium text-slate-700">UPI / QR Payments (GPay / PhonePe)</td>
+                <td className="p-2 font-medium text-slate-700">UPI</td>
                 <td className="p-2 text-right font-bold text-slate-900">
                   {formatPaiseToINR(statement.upi_sales_paise)}
                 </td>
               </tr>
               {statement.other_sales_paise > 0 && (
                 <tr>
-                  <td className="p-2 font-medium text-slate-700">Other / Credit Sales</td>
+                  <td className="p-2 font-medium text-slate-700">Other</td>
                   <td className="p-2 text-right font-bold text-slate-900">
                     {formatPaiseToINR(statement.other_sales_paise)}
                   </td>
@@ -142,7 +140,7 @@ export const DailySnapshotReport: React.FC<DailySnapshotReportProps> = ({
               )}
               <tr className="bg-emerald-50 font-black border-t-2 border-slate-300 print:bg-slate-200">
                 <td className="p-2 text-emerald-950 uppercase">
-                  Derived Cash Sales <span className="text-2xs font-normal text-emerald-800">(Total Sales − Non-Cash Channels)</span>
+                  Cash Sales
                 </td>
                 <td className="p-2 text-right text-emerald-950 text-sm font-black">
                   {formatPaiseToINR(statement.cash_sales_paise)}
@@ -156,7 +154,7 @@ export const DailySnapshotReport: React.FC<DailySnapshotReportProps> = ({
         {statement.cash_memos && statement.cash_memos.length > 0 && (
           <div className="mb-6">
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-700 bg-slate-100 p-2 rounded-t border border-slate-300 m-0 print:bg-slate-200">
-              2. Cash Memos / Bill Ranges
+              2. Cash Memos
             </h2>
             <table className="w-full text-xs border border-t-0 border-slate-300 divide-y divide-slate-200">
               <thead>
@@ -268,9 +266,6 @@ export const DailySnapshotReport: React.FC<DailySnapshotReportProps> = ({
                   <span className="text-sm sm:text-base font-black text-emerald-900 block mt-0.5">
                     {formatPaiseToINR(cashInHandPaise)}
                   </span>
-                  <span className="text-3xs text-emerald-800 font-semibold block">
-                    Cash Sales − Exp
-                  </span>
                 </div>
                 <div>
                   <span className="text-2xs font-semibold uppercase text-slate-500 block">Net Difference</span>
@@ -305,11 +300,11 @@ export const DailySnapshotReport: React.FC<DailySnapshotReportProps> = ({
 
           <div className="grid grid-cols-2 gap-8 text-xs">
             <div className="border-t border-dashed border-slate-400 pt-2 text-center">
-              <span className="block font-bold text-slate-800">Prepared by Accountant</span>
+              <span className="block font-bold text-slate-800">Prepared By</span>
               <span className="block text-2xs text-slate-400 mt-0.5">Signature & Stamp</span>
             </div>
             <div className="border-t border-dashed border-slate-400 pt-2 text-center">
-              <span className="block font-bold text-slate-800">Verified by Owner / Manager</span>
+              <span className="block font-bold text-slate-800">Verified / Approved By</span>
               <span className="block text-2xs text-slate-400 mt-0.5">Signature & Stamp</span>
             </div>
           </div>

@@ -42,19 +42,10 @@ export const ReconciliationBar: React.FC<ReconciliationBarProps> = ({
     <div className="space-y-4">
       {/* Statement Summary & Reconciliation Header */}
       <div className="bg-slate-900 text-white rounded-xl shadow-md p-4 sm:p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-800 mb-4 gap-2">
-          <div>
-            <h2 className="text-xs uppercase tracking-wider font-extrabold text-amber-400 m-0">
-              4. Statement Summary & Reconciliation
-            </h2>
-            <p className="text-2xs text-slate-400 mt-0.5 m-0">
-              Real-time financial balancing: Cash Sales − Expenses = Cash in Hand
-            </p>
-          </div>
-          <div className="text-2xs text-slate-400 flex items-center space-x-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>Balanced in Integer Paise</span>
-          </div>
+        <div className="pb-3 border-b border-slate-800 mb-4">
+          <h2 className="text-xs uppercase tracking-wider font-extrabold text-amber-400 m-0">
+            4. Summary & Reconciliation
+          </h2>
         </div>
 
         {/* 6 Key Metric Cards Grid */}
@@ -67,7 +58,6 @@ export const ReconciliationBar: React.FC<ReconciliationBarProps> = ({
             <span className="text-base sm:text-lg font-black text-amber-400 block mt-1">
               {formatPaiseToINR(totalSalesPaise)}
             </span>
-            <span className="text-3xs text-slate-500 block mt-0.5">Register / POS total</span>
           </div>
 
           {/* Cash Sales (Derived) */}
@@ -83,7 +73,6 @@ export const ReconciliationBar: React.FC<ReconciliationBarProps> = ({
             >
               {formatPaiseToINR(cashSalesPaise)}
             </span>
-            <span className="text-3xs text-slate-500 block mt-0.5">Total − non-cash</span>
           </div>
 
           {/* Total Expenses */}
@@ -94,10 +83,9 @@ export const ReconciliationBar: React.FC<ReconciliationBarProps> = ({
             <span className="text-base sm:text-lg font-black text-rose-400 block mt-1">
               {formatPaiseToINR(totalExpensesPaise)}
             </span>
-            <span className="text-3xs text-slate-500 block mt-0.5">Paid from cash</span>
           </div>
 
-          {/* Cash in Hand (Cash Sales - Expenses) -> Highlighted Hero Card */}
+          {/* Cash in Hand -> Highlighted Hero Card */}
           <div className="bg-gradient-to-br from-emerald-950/70 to-slate-800 p-3 rounded-lg border-2 border-emerald-500/80 shadow-xs relative">
             <span className="text-2xs font-black text-emerald-300 uppercase tracking-wider block flex items-center">
               <Wallet className="w-3 h-3 mr-1 text-emerald-400" />
@@ -110,9 +98,6 @@ export const ReconciliationBar: React.FC<ReconciliationBarProps> = ({
             >
               {formatPaiseToINR(cashInHandPaise)}
             </span>
-            <span className="text-3xs text-emerald-400/80 font-medium block mt-0.5 truncate">
-              Cash Sales − Expenses
-            </span>
           </div>
 
           {/* Cash Memos */}
@@ -123,10 +108,9 @@ export const ReconciliationBar: React.FC<ReconciliationBarProps> = ({
             <span className="text-base sm:text-lg font-black text-blue-400 block mt-1">
               {formatPaiseToINR(totalCashMemosPaise)}
             </span>
-            <span className="text-3xs text-slate-500 block mt-0.5">Physical bill books</span>
           </div>
 
-          {/* Net Diff (Total Sales - Expenses) */}
+          {/* Net Diff */}
           <div className="bg-slate-800/80 p-3 rounded-lg border border-slate-700/60">
             <span className="text-2xs font-semibold text-slate-400 uppercase tracking-wider block">
               Net Revenue
@@ -138,7 +122,6 @@ export const ReconciliationBar: React.FC<ReconciliationBarProps> = ({
             >
               {formatPaiseToINR(netDifferencePaise)}
             </span>
-            <span className="text-3xs text-slate-500 block mt-0.5">Total Sales − Exp</span>
           </div>
         </div>
 
@@ -161,7 +144,7 @@ export const ReconciliationBar: React.FC<ReconciliationBarProps> = ({
           <div className="mb-4 bg-amber-950/80 border border-amber-800/80 rounded-lg p-3 text-xs text-amber-200">
             <div className="flex items-center space-x-2 font-bold mb-1">
               <AlertTriangle className="w-4 h-4 text-amber-400" />
-              <span>Reconciliation Warnings:</span>
+              <span>Warnings:</span>
             </div>
             <ul className="list-disc pl-5 space-y-0.5">
               {reconciliation.warnings.map((warn, i) => (
@@ -174,28 +157,26 @@ export const ReconciliationBar: React.FC<ReconciliationBarProps> = ({
         {reconciliation.isValid && reconciliation.warnings.length === 0 && (
           <div className="mb-4 bg-emerald-950/60 border border-emerald-800/60 rounded-lg p-2.5 text-xs text-emerald-300 flex items-center space-x-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span>
-              All figures balance cleanly. Physical cash in hand: {formatPaiseToINR(cashInHandPaise)}.
-            </span>
+            <span>All figures balanced.</span>
           </div>
         )}
 
         {/* Notes input */}
         <div className="mt-4">
           <label className="block text-2xs font-semibold uppercase tracking-wider text-slate-400 mb-1">
-            Accountant / Manager Notes & Sign-off Remarks:
+            Notes & Remarks:
           </label>
           <textarea
             rows={2}
             value={notes}
             onChange={e => onNotesChange(e.target.value)}
-            placeholder="Add any discrepancies, handovers, cash-in-hand adjustments, or remarks..."
+            placeholder="Add any remarks, handovers, or discrepancy notes..."
             className="w-full px-3 py-2 bg-slate-800 text-xs rounded-md border border-slate-700 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
           />
         </div>
       </div>
 
-      {/* Sticky / Primary Action Buttons */}
+      {/* Primary Action Buttons */}
       <div className="sticky bottom-3 z-20 bg-white/95 backdrop-blur-md p-3.5 rounded-xl border border-slate-200 shadow-lg flex items-center justify-between gap-3">
         <div className="flex items-center space-x-2">
           <span
@@ -206,9 +187,6 @@ export const ReconciliationBar: React.FC<ReconciliationBarProps> = ({
             }`}
           >
             {status}
-          </span>
-          <span className="text-xs text-slate-500 hidden sm:inline">
-            {status === 'FINALIZED' ? 'Locked & ready for print' : 'In-progress draft'}
           </span>
         </div>
 

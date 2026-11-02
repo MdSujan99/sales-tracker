@@ -60,7 +60,6 @@ export const DailyEntryForm: React.FC<DailyEntryFormProps> = ({
 }) => {
   const { restaurant, user } = useAuth();
 
-  // Helper to get today's date in YYYY-MM-DD
   const getTodayDate = () => new Date().toISOString().split('T')[0];
 
   const createBlankStatement = (): DailyStatement => ({
@@ -76,7 +75,7 @@ export const DailyEntryForm: React.FC<DailyEntryFormProps> = ({
     other_sales_paise: 0,
     total_sales_paise: 0,
     cash_memos: [
-      { id: generateUuid(), from_number: '', to_number: '', source: 'Counter / Dine-in', amount_paise: 0 },
+      { id: generateUuid(), from_number: '', to_number: '', source: 'Counter', amount_paise: 0 },
     ],
     total_cash_memos_paise: 0,
     expense_entries: [],
@@ -113,7 +112,7 @@ export const DailyEntryForm: React.FC<DailyEntryFormProps> = ({
     }
   }, [statement]);
 
-  // If initialStatement prop changes (e.g. from history click or auto-load), update form
+  // If initialStatement prop changes, update form
   useEffect(() => {
     if (initialStatement) {
       setStatement(initialStatement);
@@ -157,7 +156,7 @@ export const DailyEntryForm: React.FC<DailyEntryFormProps> = ({
       ...baseReconciliation.errors,
       ...(conflictingStatement
         ? [
-            `Date Conflict: A ${conflictingStatement.status.toLowerCase()} statement (${conflictingStatement.statement_number}) already exists for ${statement.business_date}. Only one statement per calendar day is permitted.`,
+            `Date Conflict: A statement (${conflictingStatement.statement_number}) already exists for ${statement.business_date}. Only one statement per date is allowed.`,
           ]
         : []),
     ],
@@ -214,7 +213,7 @@ export const DailyEntryForm: React.FC<DailyEntryFormProps> = ({
   const handleSave = async (statusToSet: 'DRAFT' | 'FINALIZED') => {
     if (conflictingStatement) {
       setSaveErrorMsg(
-        `Cannot save statement: A ${conflictingStatement.status.toLowerCase()} statement (${conflictingStatement.statement_number}) already exists for ${statement.business_date}. Only one statement per business date is permitted.`
+        `A statement (${conflictingStatement.statement_number}) already exists for ${statement.business_date}.`
       );
       return;
     }
@@ -245,12 +244,12 @@ export const DailyEntryForm: React.FC<DailyEntryFormProps> = ({
       onStatementSaved(finalStatement);
       if (statusToSet === 'FINALIZED') {
         localStorage.removeItem(LOCAL_DRAFT_KEY);
-        setSaveSuccessMsg('Statement finalized and saved successfully!');
+        setSaveSuccessMsg('Statement finalized and saved successfully.');
         setTimeout(() => {
           onViewSnapshot(finalStatement);
         }, 1200);
       } else {
-        setSaveSuccessMsg('Draft saved successfully.');
+        setSaveSuccessMsg('Draft saved.');
         setTimeout(() => setSaveSuccessMsg(null), 3000);
       }
     } else {
@@ -259,14 +258,14 @@ export const DailyEntryForm: React.FC<DailyEntryFormProps> = ({
   };
 
   const handleUnlockStatement = () => {
-    if (window.confirm('Do you want to unlock this statement to make corrections? You can edit figures and re-finalize once balanced.')) {
+    if (window.confirm('Unlock this statement to make corrections?')) {
       setStatement(prev => ({
         ...prev,
         status: 'DRAFT',
         updated_at: new Date().toISOString(),
       }));
-      setSaveSuccessMsg('Statement unlocked. You can now edit figures and re-finalize.');
-      setTimeout(() => setSaveSuccessMsg(null), 4000);
+      setSaveSuccessMsg('Statement unlocked for editing.');
+      setTimeout(() => setSaveSuccessMsg(null), 3000);
     }
   };
 
@@ -310,7 +309,7 @@ export const DailyEntryForm: React.FC<DailyEntryFormProps> = ({
         </div>
       )}
 
-      {/* Date Collision Warning Banner (Only 1 statement per day allowed) */}
+      {/* Date Collision Warning Banner */}
       {conflictingStatement && (
         <div className={`mb-6 p-4 rounded-xl border shadow-xs ${
           conflictingStatement.status === 'FINALIZED'
@@ -328,14 +327,12 @@ export const DailyEntryForm: React.FC<DailyEntryFormProps> = ({
                 <h3 className="text-sm font-bold m-0">
                   {conflictingStatement.status === 'FINALIZED'
                     ? 'Statement Already Finalized for this Date'
-                    : 'Draft Statement Already Exists for this Date'}
+                    : 'Draft Already Exists for this Date'}
                 </h3>
-                <p className={`text-xs mt-1 m-0 ${
+                <p className={`text-xs mt-0.5 m-0 ${
                   conflictingStatement.status === 'FINALIZED' ? 'text-rose-700' : 'text-amber-700'
                 }`}>
-                  A {conflictingStatement.status.toLowerCase()} statement (
-                  <span className="font-mono font-bold">{conflictingStatement.statement_number}</span>
-                  ) already exists for <span className="font-bold">{statement.business_date}</span>. To preserve cash book consistency, each day can only have one statement.
+                  Statement <span className="font-mono font-bold">{conflictingStatement.statement_number}</span> already exists for <span className="font-bold">{statement.business_date}</span>.
                 </p>
               </div>
             </div>
@@ -350,7 +347,7 @@ export const DailyEntryForm: React.FC<DailyEntryFormProps> = ({
                     : 'bg-amber-600 hover:bg-amber-700'
                 }`}
               >
-                Open Existing Statement
+                Open Statement
               </button>
 
               {conflictingStatement.status === 'FINALIZED' && (
@@ -368,7 +365,7 @@ export const DailyEntryForm: React.FC<DailyEntryFormProps> = ({
         </div>
       )}
 
-      {/* Statement Locked Banner (When currently viewing a finalized statement) */}
+      {/* Statement Locked Banner */}
       {!conflictingStatement && statement.status === 'FINALIZED' && (
         <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl shadow-xs text-emerald-950">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -377,14 +374,14 @@ export const DailyEntryForm: React.FC<DailyEntryFormProps> = ({
               <div>
                 <div className="flex items-center space-x-2">
                   <h3 className="text-sm font-bold m-0">
-                    Statement Finalized & Signed Off
+                    Statement Finalized
                   </h3>
                   <span className="px-2 py-0.5 bg-emerald-200 text-emerald-900 rounded text-2xs font-bold font-mono">
                     {statement.statement_number}
                   </span>
                 </div>
-                <p className="text-xs text-emerald-700 mt-1 m-0">
-                  This statement for <span className="font-bold">{statement.business_date}</span> is finalized. Figures are locked to maintain physical cash book integrity.
+                <p className="text-xs text-emerald-700 mt-0.5 m-0">
+                  Figures are locked for <span className="font-bold">{statement.business_date}</span>.
                 </p>
               </div>
             </div>
@@ -413,35 +410,30 @@ export const DailyEntryForm: React.FC<DailyEntryFormProps> = ({
       )}
 
       {/* Statement Header Card (Date & Statement #) */}
-      <div className="bg-white rounded-xl shadow-xs border border-slate-200 p-4 sm:p-6 mb-6">
+      <div className="bg-white rounded-xl shadow-xs border border-slate-200 p-4 sm:p-5 mb-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center space-x-3">
-              <h1 className="text-xl font-black text-slate-900 tracking-tight m-0">
-                Daily Cash Statement Entry
-              </h1>
-              {onCreateNewStatement && (
-                <button
-                  type="button"
-                  onClick={onCreateNewStatement}
-                  className="inline-flex items-center px-2.5 py-1 text-2xs font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-md transition-colors"
-                  title="Start a new daily statement for another date"
-                >
-                  <PlusCircle className="w-3.5 h-3.5 mr-1" />
-                  New Date Entry
-                </button>
-              )}
-            </div>
-            <p className="text-xs text-slate-500 mt-1 m-0">
-              Enter sales channels, cash memos, and itemized expenses
-            </p>
+          <div className="flex items-center space-x-3">
+            <h1 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight m-0">
+              Daily Statement Entry
+            </h1>
+            {onCreateNewStatement && (
+              <button
+                type="button"
+                onClick={onCreateNewStatement}
+                className="inline-flex items-center px-2.5 py-1 text-2xs font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-md transition-colors"
+                title="Start a new statement"
+              >
+                <PlusCircle className="w-3.5 h-3.5 mr-1" />
+                New Entry
+              </button>
+            )}
           </div>
 
           <div className="flex items-center space-x-3">
             {/* Business Date */}
             <div>
               <label className="block text-2xs font-semibold uppercase tracking-wider text-slate-500 mb-1">
-                Business Date
+                Date
               </label>
               <div className="relative">
                 <input
@@ -488,10 +480,6 @@ export const DailyEntryForm: React.FC<DailyEntryFormProps> = ({
       <SalesChannelsSection
         sales={salesBreakdown}
         onChange={handleSalesChange}
-        enteredAccountSalesPaise={statement.entered_account_sales_paise}
-        onEnteredAccountSalesChange={val =>
-          setStatement(prev => ({ ...prev, entered_account_sales_paise: val }))
-        }
       />
 
       {/* Section 2: Cash Memos */}
@@ -504,10 +492,6 @@ export const DailyEntryForm: React.FC<DailyEntryFormProps> = ({
         onAddCategory={onAddCategory}
         onRemoveCategory={onRemoveCategory}
         onChange={handleExpensesChange}
-        enteredAccountExpensesPaise={statement.entered_account_expenses_paise}
-        onEnteredAccountExpensesChange={val =>
-          setStatement(prev => ({ ...prev, entered_account_expenses_paise: val }))
-        }
       />
 
       {/* Section 4: Summary & Reconciliation Bar */}
