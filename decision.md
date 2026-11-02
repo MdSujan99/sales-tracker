@@ -7,6 +7,30 @@ Whenever any change is made to existing code or schema, add an entry with the **
 
 ## Decision Log
 
+### 2026-11-03: Summary & Reconciliation Section Theme Harmonization
+- **Reason**: The "4. Summary & Reconciliation" card was hardcoded with pitch-black `bg-slate-900` and dark-only styles, clashing with the light/dark design system used across Sections 1, 2, and 3.
+- **Change**: Refactored [`ReconciliationBar.tsx`](file:///src/components/entry/ReconciliationBar.tsx) to follow the unified theme palette (`bg-white dark:bg-slate-900` card container, `bg-slate-50 dark:bg-slate-800/60` stat tiles, unified typography hierarchy, theme-adaptive status alerts, and standard light/dark input fields).
+
+### 2026-11-03: Gap Between Daily Statement Entry Title and New Entry Button
+- **Reason**: The legacy Tailwind `space-x-3` utility failed to create spacing between the heading and "New Entry" button under Tailwind CSS v4 flex layout.
+- **Change**: Replaced `space-x-3` with standard flex `gap-3` in [`DailyEntryForm.tsx`](file:///src/components/entry/DailyEntryForm.tsx).
+
+### 2026-11-03: Terracotta Floating Navbar with White Active Tab
+- **Reason**: The user requested the floating navigation bar to feature the terracotta primary background with a crisp white pill and black text for the active tab.
+- **Change**: Updated [`TabNav.tsx`](file:///src/components/layout/TabNav.tsx) outer container to `bg-amber-600/95 dark:bg-amber-700/95`, active tab button style to `bg-white text-slate-900 shadow-md` with matching icon color, and inactive tabs to readable high-contrast warm white/amber tones (`text-amber-100/90 hover:bg-white/15`).
+
+### 2026-11-03: Floating Bottom Navbar Height Adjustment
+- **Reason**: The user requested the floating navigation bar to be taller for better touch ergonomics and visual prominence.
+- **Change**: Updated [`TabNav.tsx`](file:///src/components/layout/TabNav.tsx) button vertical padding (`py-2.5 sm:py-3`), outer dock padding (`p-2 sm:p-2.5`), and icon sizing to provide a taller, more comfortable tap target.
+
+### 2026-11-03: Tailwind v4 Class-Based Dark Mode Directive
+- **Reason**: In Tailwind CSS v4, the `dark:` variant defaults strictly to media query `prefers-color-scheme`. Toggling `.dark` on `document.documentElement` did not apply dark classes without explicitly configuring the class variant.
+- **Change**: Added `@custom-variant dark (&:where(.dark, .dark *));` to [`index.css`](file:///src/index.css) to enable manual class-based dark mode toggling.
+
+### 2026-11-03: 3-Color Palette & Light/Dark Mode Switching
+- **Reason**: The user requested a 3-color palette (Warm Terracotta/Amber primary, Slate neutral/backgrounds, and Indigo accent) with dark/light mode toggle support while retaining functional green, red, and yellow status colors.
+- **Change**: Created [`ThemeContext.tsx`](file:///src/context/ThemeContext.tsx) with persistent mode storage and system-theme detection, integrated Sun/Moon toggle in [`Navbar.tsx`](file:///src/components/layout/Navbar.tsx), and added dark theme styles across entry forms, navigation, history, and analytics.
+
 ### 2026-11-03: Floating Bottom Navigation Dock
 - **Reason**: The user requested the bottom navigation bar to be floating for an app-like feel.
 - **Change**: Updated [`TabNav.tsx`](file:///src/components/layout/TabNav.tsx) into a floating pill dock (`fixed bottom-4 inset-x-0`, `max-w-lg`, `rounded-2xl`, `backdrop-blur-md`, `shadow-xl`) centered above the screen edge with smooth active tab highlights.

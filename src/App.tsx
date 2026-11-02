@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AuthProvider } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import { Navbar } from './components/layout/Navbar';
 import { TabNav, type AppTab } from './components/layout/TabNav';
 import { DailyEntryForm } from './components/entry/DailyEntryForm';
@@ -178,7 +179,7 @@ const MainApp: React.FC = () => {
   const statementToSnapshot = snapshotStatement || activeStatement || statements[0] || null;
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col font-sans transition-colors duration-200">
       <Navbar />
       <TabNav
         activeTab={activeTab}
@@ -223,10 +224,10 @@ const MainApp: React.FC = () => {
               onBack={() => setActiveTab('ENTRY')}
             />
           ) : (
-            <div className="max-w-md mx-auto my-12 bg-white rounded-xl border border-slate-200 p-8 text-center shadow-xs">
-              <FileText className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-              <h2 className="text-base font-bold text-slate-800 m-0">No Statement Available</h2>
-              <p className="text-xs text-slate-500 mt-1 mb-5">
+            <div className="max-w-md mx-auto my-12 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-8 text-center shadow-xs">
+              <FileText className="w-10 h-10 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+              <h2 className="text-base font-bold text-slate-800 dark:text-slate-100 m-0">No Statement Available</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-5">
                 Complete and save your first daily cash statement in the Daily Entry tab to view and print your A4 snapshot.
               </p>
               <button
@@ -261,8 +262,10 @@ const MainApp: React.FC = () => {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <MainApp />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <MainApp />
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

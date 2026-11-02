@@ -31,11 +31,11 @@ export const DailySnapshotReport: React.FC<DailySnapshotReportProps> = ({
   return (
     <div className="max-w-2xl mx-auto pb-16 font-mono print:max-w-xl print:mx-auto print:pb-0">
       {/* Control Action Bar */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs mb-6 flex flex-wrap items-center justify-between gap-3 no-print">
+      <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs mb-6 flex flex-wrap items-center justify-between gap-3 no-print transition-colors duration-200">
         <button
           type="button"
           onClick={onBack}
-          className="inline-flex items-center text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors"
+          className="inline-flex items-center text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
         >
           <ArrowLeft className="w-4 h-4 mr-1.5" />
           Back to Entry
@@ -45,7 +45,7 @@ export const DailySnapshotReport: React.FC<DailySnapshotReportProps> = ({
           <button
             type="button"
             onClick={onEdit}
-            className="inline-flex items-center px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors border border-slate-300"
+            className="inline-flex items-center px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors border border-slate-300 dark:border-slate-700"
           >
             <Edit3 className="w-3.5 h-3.5 mr-1.5" />
             Edit Statement
@@ -54,7 +54,7 @@ export const DailySnapshotReport: React.FC<DailySnapshotReportProps> = ({
           <button
             type="button"
             onClick={handlePrint}
-            className="inline-flex items-center px-4 py-1.5 rounded-lg text-xs font-bold bg-slate-900 text-white hover:bg-black shadow-xs transition-colors"
+            className="inline-flex items-center px-4 py-1.5 rounded-lg text-xs font-bold bg-amber-600 dark:bg-amber-500 text-white hover:bg-amber-700 dark:hover:bg-amber-600 shadow-xs transition-colors"
           >
             <Printer className="w-4 h-4 mr-1.5" />
             Print / Save PDF

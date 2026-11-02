@@ -87,16 +87,16 @@ export const StatementHistory: React.FC<StatementHistoryProps> = ({
 
   return (
     <div className="max-w-6xl mx-auto pb-16">
-      <div className="bg-white rounded-xl shadow-xs border border-slate-200 p-4 sm:p-6 mb-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
-          <h1 className="text-xl font-black text-slate-900 tracking-tight m-0">
+      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-xs border border-slate-200 dark:border-slate-800 p-4 sm:p-6 mb-6 transition-colors duration-200">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
+          <h1 className="text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight m-0">
             Statement History
           </h1>
 
           <button
             type="button"
             onClick={handleExportCSV}
-            className="inline-flex items-center px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors border border-slate-300 self-start sm:self-auto"
+            className="inline-flex items-center px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors border border-slate-300 dark:border-slate-700 self-start sm:self-auto"
           >
             <Download className="w-3.5 h-3.5 mr-1.5" />
             Export CSV
@@ -112,11 +112,11 @@ export const StatementHistory: React.FC<StatementHistoryProps> = ({
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder="Search date, statement #, or notes..."
-              className="w-full pl-9 pr-3 py-2 bg-slate-50 text-xs rounded-lg border border-slate-200 focus:outline-none focus:bg-white focus:ring-1 focus:ring-amber-500"
+              className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 text-xs rounded-lg border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:bg-white dark:focus:bg-slate-900 focus:ring-1 focus:ring-amber-500"
             />
           </div>
 
-          <div className="flex items-center space-x-1.5 bg-slate-50 p-1 rounded-lg border border-slate-200">
+          <div className="flex items-center space-x-1.5 bg-slate-50 dark:bg-slate-800 p-1 rounded-lg border border-slate-200 dark:border-slate-700">
             <Filter className="w-3.5 h-3.5 text-slate-400 ml-1.5" />
             {(['ALL', 'FINALIZED', 'DRAFT'] as const).map(status => (
               <button
@@ -125,8 +125,8 @@ export const StatementHistory: React.FC<StatementHistoryProps> = ({
                 onClick={() => setStatusFilter(status)}
                 className={`px-2.5 py-1 rounded text-2xs font-bold transition-all ${
                   statusFilter === status
-                    ? 'bg-white text-slate-900 shadow-xs'
-                    : 'text-slate-500 hover:text-slate-800'
+                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-xs'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
                 }`}
               >
                 {status}
@@ -138,10 +138,10 @@ export const StatementHistory: React.FC<StatementHistoryProps> = ({
 
       {/* Statements List */}
       {filteredStatements.length === 0 ? (
-        <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
-          <FileText className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-          <h2 className="text-sm font-bold text-slate-800 m-0">No statements found</h2>
-          <p className="text-xs text-slate-500 mt-1 m-0">
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-12 text-center transition-colors duration-200">
+          <FileText className="w-10 h-10 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+          <h2 className="text-sm font-bold text-slate-800 dark:text-slate-200 m-0">No statements found</h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 m-0">
             {statements.length === 0
               ? 'Complete and save your first daily statement in the Daily Entry tab.'
               : 'Try clearing your search or filter.'}
@@ -152,26 +152,26 @@ export const StatementHistory: React.FC<StatementHistoryProps> = ({
           {filteredStatements.map(stmt => (
             <div
               key={stmt.id}
-              className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5 shadow-xs hover:border-slate-300 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
+              className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 sm:p-5 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
             >
               {/* Left Details */}
               <div className="space-y-1.5 flex-1 min-w-0">
                 <div className="flex items-center space-x-2.5">
-                  <span className="font-bold text-sm text-slate-900 font-mono">
+                  <span className="font-bold text-sm text-slate-900 dark:text-slate-100 font-mono">
                     {stmt.statement_number}
                   </span>
                   <span
                     className={`inline-flex items-center px-2 py-0.5 rounded text-2xs font-bold ${
                       stmt.status === 'FINALIZED'
-                        ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                        : 'bg-amber-50 text-amber-800 border border-amber-200'
+                        ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
+                        : 'bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800'
                     }`}
                   >
                     {stmt.status}
                   </span>
                 </div>
 
-                <div className="flex items-center space-x-4 text-xs text-slate-500">
+                <div className="flex items-center space-x-4 text-xs text-slate-500 dark:text-slate-400">
                   <span className="flex items-center">
                     <Calendar className="w-3.5 h-3.5 mr-1 text-slate-400" />
                     {new Date(stmt.business_date + 'T00:00:00').toLocaleDateString('en-IN', {
@@ -185,40 +185,40 @@ export const StatementHistory: React.FC<StatementHistoryProps> = ({
                 </div>
 
                 {stmt.notes && (
-                  <p className="text-xs text-slate-600 italic line-clamp-1 m-0">
+                  <p className="text-xs text-slate-600 dark:text-slate-400 italic line-clamp-1 m-0">
                     "{stmt.notes}"
                   </p>
                 )}
               </div>
 
               {/* Financial Metrics */}
-              <div className="flex items-center space-x-6 bg-slate-50 p-2.5 rounded-lg border border-slate-200/60 self-start md:self-auto">
+              <div className="flex items-center space-x-6 bg-slate-50 dark:bg-slate-800/60 p-2.5 rounded-lg border border-slate-200/60 dark:border-slate-700/60 self-start md:self-auto">
                 <div>
-                  <span className="text-2xs uppercase text-slate-400 font-bold block">Sales</span>
-                  <span className="text-xs font-bold text-emerald-700 block">
+                  <span className="text-2xs uppercase text-slate-400 dark:text-slate-500 font-bold block">Sales</span>
+                  <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 block">
                     {formatPaiseToINR(stmt.total_sales_paise)}
                   </span>
                 </div>
                 <div>
-                  <span className="text-2xs uppercase text-slate-400 font-bold block">Expenses</span>
-                  <span className="text-xs font-bold text-rose-700 block">
+                  <span className="text-2xs uppercase text-slate-400 dark:text-slate-500 font-bold block">Expenses</span>
+                  <span className="text-xs font-bold text-rose-700 dark:text-rose-400 block">
                     {formatPaiseToINR(stmt.total_expenses_paise)}
                   </span>
                 </div>
                 <div>
-                  <span className="text-2xs uppercase text-slate-400 font-bold block">Net</span>
-                  <span className="text-xs font-black text-slate-900 block">
+                  <span className="text-2xs uppercase text-slate-400 dark:text-slate-500 font-bold block">Net</span>
+                  <span className="text-xs font-black text-slate-900 dark:text-slate-100 block">
                     {formatPaiseToINR(stmt.net_difference_paise)}
                   </span>
                 </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center space-x-1.5 self-end md:self-auto pt-2 md:pt-0 border-t md:border-t-0 border-slate-100 w-full md:w-auto justify-end">
+              <div className="flex items-center space-x-1.5 self-end md:self-auto pt-2 md:pt-0 border-t md:border-t-0 border-slate-100 dark:border-slate-800 w-full md:w-auto justify-end">
                 <button
                   type="button"
                   onClick={() => onViewSnapshot(stmt)}
-                  className="p-2 text-slate-600 hover:text-amber-700 hover:bg-amber-50 rounded-lg transition-colors"
+                  className="p-2 text-slate-600 dark:text-slate-400 hover:text-amber-700 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 rounded-lg transition-colors"
                   title="Print Snapshot"
                 >
                   <FileText className="w-4 h-4" />
@@ -227,7 +227,7 @@ export const StatementHistory: React.FC<StatementHistoryProps> = ({
                 <button
                   type="button"
                   onClick={() => onOpenStatement(stmt)}
-                  className="p-2 text-slate-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
+                  className="p-2 text-slate-600 dark:text-slate-400 hover:text-amber-700 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 rounded-lg transition-colors"
                   title="Edit statement"
                 >
                   <Edit className="w-4 h-4" />
@@ -236,7 +236,7 @@ export const StatementHistory: React.FC<StatementHistoryProps> = ({
                 <button
                   type="button"
                   onClick={() => onDuplicateStatement(stmt)}
-                  className="p-2 text-slate-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition-colors"
+                  className="p-2 text-slate-600 dark:text-slate-400 hover:text-amber-700 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 rounded-lg transition-colors"
                   title="Duplicate for today"
                 >
                   <Copy className="w-4 h-4" />
@@ -249,7 +249,7 @@ export const StatementHistory: React.FC<StatementHistoryProps> = ({
                       onDeleteStatement(stmt.id);
                     }
                   }}
-                  className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                  className="p-2 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors"
                   title="Delete statement"
                 >
                   <Trash2 className="w-4 h-4" />

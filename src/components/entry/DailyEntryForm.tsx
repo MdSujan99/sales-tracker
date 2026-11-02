@@ -354,7 +354,7 @@ export const DailyEntryForm: React.FC<DailyEntryFormProps> = ({
                 <button
                   type="button"
                   onClick={() => onViewSnapshot(conflictingStatement)}
-                  className="px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-rose-700 hover:bg-rose-100 border border-rose-300 transition-colors inline-flex items-center"
+                  className="px-3 py-1.5 rounded-lg text-xs font-bold bg-white dark:bg-slate-900 text-rose-700 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-950/60 border border-rose-300 dark:border-rose-800 transition-colors inline-flex items-center"
                 >
                   <ExternalLink className="w-3.5 h-3.5 mr-1" />
                   Snapshot
@@ -367,20 +367,20 @@ export const DailyEntryForm: React.FC<DailyEntryFormProps> = ({
 
       {/* Statement Locked Banner */}
       {!conflictingStatement && statement.status === 'FINALIZED' && (
-        <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl shadow-xs text-emerald-950">
+        <div className="mb-6 p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-xl shadow-xs text-emerald-950 dark:text-emerald-200">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-start space-x-3">
-              <Lock className="w-5 h-5 text-emerald-600 mt-0.5 shrink-0" />
+              <Lock className="w-5 h-5 text-emerald-600 dark:text-emerald-400 mt-0.5 shrink-0" />
               <div>
                 <div className="flex items-center space-x-2">
                   <h3 className="text-sm font-bold m-0">
                     Statement Finalized
                   </h3>
-                  <span className="px-2 py-0.5 bg-emerald-200 text-emerald-900 rounded text-2xs font-bold font-mono">
+                  <span className="px-2 py-0.5 bg-emerald-200 dark:bg-emerald-900 text-emerald-900 dark:text-emerald-200 rounded text-2xs font-bold font-mono">
                     {statement.statement_number}
                   </span>
                 </div>
-                <p className="text-xs text-emerald-700 mt-0.5 m-0">
+                <p className="text-xs text-emerald-700 dark:text-emerald-300 mt-0.5 m-0">
                   Figures are locked for <span className="font-bold">{statement.business_date}</span>.
                 </p>
               </div>
@@ -390,7 +390,7 @@ export const DailyEntryForm: React.FC<DailyEntryFormProps> = ({
               <button
                 type="button"
                 onClick={() => onViewSnapshot(statement)}
-                className="px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-emerald-800 hover:bg-emerald-100 border border-emerald-300 transition-colors inline-flex items-center shadow-xs"
+                className="px-3 py-1.5 rounded-lg text-xs font-bold bg-white dark:bg-slate-900 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 transition-colors inline-flex items-center shadow-xs"
               >
                 <ExternalLink className="w-3.5 h-3.5 mr-1" />
                 View Snapshot
@@ -410,17 +410,17 @@ export const DailyEntryForm: React.FC<DailyEntryFormProps> = ({
       )}
 
       {/* Statement Header Card (Date & Statement #) */}
-      <div className="bg-white rounded-xl shadow-xs border border-slate-200 p-4 sm:p-5 mb-6">
+      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-xs border border-slate-200 dark:border-slate-800 p-4 sm:p-5 mb-6 transition-colors duration-200">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center space-x-3">
-            <h1 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight m-0">
+          <div className="flex items-center gap-3">
+            <h1 className="text-lg sm:text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight m-0">
               Daily Statement Entry
             </h1>
             {onCreateNewStatement && (
               <button
                 type="button"
                 onClick={onCreateNewStatement}
-                className="inline-flex items-center px-2.5 py-1 text-2xs font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-md transition-colors"
+                className="inline-flex items-center px-2.5 py-1 text-2xs font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 dark:hover:bg-amber-900/60 border border-amber-200 dark:border-amber-800 rounded-md transition-colors"
                 title="Start a new statement"
               >
                 <PlusCircle className="w-3.5 h-3.5 mr-1" />
@@ -429,10 +429,10 @@ export const DailyEntryForm: React.FC<DailyEntryFormProps> = ({
             )}
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center gap-3">
             {/* Business Date */}
             <div>
-              <label className="block text-2xs font-semibold uppercase tracking-wider text-slate-500 mb-1">
+              <label className="block text-2xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
                 Date
               </label>
               <div className="relative">
@@ -448,7 +448,7 @@ export const DailyEntryForm: React.FC<DailyEntryFormProps> = ({
                     }));
                     setSaveErrorMsg(null);
                   }}
-                  className="pl-8 pr-2.5 py-1.5 bg-slate-50 text-xs font-bold text-slate-900 rounded-md border border-slate-300 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                  className="pl-8 pr-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-900 dark:text-slate-100 rounded-md border border-slate-300 dark:border-slate-700 focus:outline-none focus:ring-1 focus:ring-amber-500"
                 />
                 <Calendar className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2 pointer-events-none" />
               </div>
@@ -456,7 +456,7 @@ export const DailyEntryForm: React.FC<DailyEntryFormProps> = ({
 
             {/* Statement Number */}
             <div>
-              <label className="block text-2xs font-semibold uppercase tracking-wider text-slate-500 mb-1">
+              <label className="block text-2xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
                 Statement #
               </label>
               <div className="relative">
@@ -467,7 +467,7 @@ export const DailyEntryForm: React.FC<DailyEntryFormProps> = ({
                     setStatement(prev => ({ ...prev, statement_number: e.target.value }))
                   }
                   placeholder="ST-XXXX-01"
-                  className="pl-7 pr-2.5 py-1.5 bg-slate-50 text-xs font-bold text-slate-900 rounded-md border border-slate-300 focus:outline-none focus:ring-1 focus:ring-amber-500 w-32"
+                  className="pl-7 pr-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-900 dark:text-slate-100 rounded-md border border-slate-300 dark:border-slate-700 focus:outline-none focus:ring-1 focus:ring-amber-500 w-32"
                 />
                 <Hash className="w-3.5 h-3.5 text-slate-400 absolute left-2 top-2 pointer-events-none" />
               </div>

@@ -116,18 +116,18 @@ export const ExpensesSection: React.FC<ExpensesSectionProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-xs border border-slate-200 p-4 sm:p-6 mb-6">
+    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-xs border border-slate-200 dark:border-slate-800 p-4 sm:p-6 mb-6 transition-colors duration-200">
       {/* Section Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+      <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800 mb-4">
         <div className="flex items-center space-x-2">
-          <div className="p-1.5 rounded-md bg-rose-50 text-rose-600">
+          <div className="p-1.5 rounded-md bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400">
             <ShoppingBag className="w-5 h-5" />
           </div>
-          <h2 className="text-base font-bold text-slate-900 m-0">3. Daily Expenses</h2>
+          <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 m-0">3. Daily Expenses</h2>
         </div>
         <div className="text-right">
-          <span className="text-2xs text-slate-400 font-medium uppercase tracking-wider block">Total Expenses</span>
-          <span className="text-base sm:text-lg font-black text-rose-700 tracking-tight">
+          <span className="text-2xs text-slate-400 dark:text-slate-500 font-medium uppercase tracking-wider block">Total Expenses</span>
+          <span className="text-base sm:text-lg font-black text-rose-700 dark:text-rose-400 tracking-tight">
             {formatPaiseToINR(totalExpensesPaise)}
           </span>
         </div>
@@ -137,7 +137,7 @@ export const ExpensesSection: React.FC<ExpensesSectionProps> = ({
       {isAddingCategory && (
         <form
           onSubmit={handleCreateCategory}
-          className="mb-4 p-3 bg-rose-50/70 border border-rose-200 rounded-lg flex flex-col sm:flex-row items-stretch sm:items-center gap-2 animate-fade-in"
+          className="mb-4 p-3 bg-rose-50/70 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 rounded-lg flex flex-col sm:flex-row items-stretch sm:items-center gap-2 animate-fade-in"
         >
           <div className="flex-1">
             <input
@@ -148,7 +148,7 @@ export const ExpensesSection: React.FC<ExpensesSectionProps> = ({
                 if (categoryError) setCategoryError(null);
               }}
               placeholder="Enter new category name..."
-              className="w-full px-3 py-1.5 text-xs bg-white rounded border border-rose-300 font-medium text-slate-900 focus:outline-none focus:ring-1 focus:ring-rose-500"
+              className="w-full px-3 py-1.5 text-xs bg-white dark:bg-slate-900 rounded border border-rose-300 dark:border-rose-700 font-medium text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-rose-500"
               autoFocus
             />
           </div>
@@ -167,20 +167,20 @@ export const ExpensesSection: React.FC<ExpensesSectionProps> = ({
                 setCategoryError(null);
                 setSelectedCategory(categories[0]?.name || '');
               }}
-              className="px-2.5 py-1.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded text-xs font-semibold"
+              className="px-2.5 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded text-xs font-semibold"
             >
               Cancel
             </button>
           </div>
           {categoryError && (
-            <p className="w-full text-2xs font-bold text-rose-600 m-0">{categoryError}</p>
+            <p className="w-full text-2xs font-bold text-rose-600 dark:text-rose-400 m-0">{categoryError}</p>
           )}
         </form>
       )}
 
       {/* Quick Add Pills */}
       <div className="mb-4">
-        <label className="block text-2xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
+        <label className="block text-2xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
           Quick Add:
         </label>
 
@@ -193,8 +193,8 @@ export const ExpensesSection: React.FC<ExpensesSectionProps> = ({
                 onClick={() => handleQuickAddCategory(cat)}
                 className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${
                   cat.is_predefined
-                    ? 'bg-slate-100 text-slate-700 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 border-slate-200'
-                    : 'bg-rose-50/90 text-rose-800 hover:bg-rose-100 border-rose-300 font-semibold'
+                    ? 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:text-rose-700 dark:hover:text-rose-300 hover:border-rose-200 dark:hover:border-rose-800 border-slate-200 dark:border-slate-700'
+                    : 'bg-rose-50/90 dark:bg-rose-950/50 text-rose-800 dark:text-rose-200 hover:bg-rose-100 dark:hover:bg-rose-900/50 border-rose-300 dark:border-rose-800 font-semibold'
                 }`}
               >
                 <Plus className="w-3 h-3 mr-1" />
@@ -202,7 +202,7 @@ export const ExpensesSection: React.FC<ExpensesSectionProps> = ({
                 {!cat.is_predefined && (
                   <span
                     onClick={e => handleDeleteCustomCategory(cat, e)}
-                    className="ml-1.5 p-0.5 rounded-full hover:bg-rose-200 text-rose-500 hover:text-rose-800"
+                    className="ml-1.5 p-0.5 rounded-full hover:bg-rose-200 dark:hover:bg-rose-800 text-rose-500 dark:text-rose-400 hover:text-rose-800 dark:hover:text-rose-100"
                     title="Delete category"
                   >
                     <X className="w-2.5 h-2.5" />
@@ -215,7 +215,7 @@ export const ExpensesSection: React.FC<ExpensesSectionProps> = ({
       </div>
 
       {/* Add New Line Form */}
-      <form onSubmit={handleAddCustomExpense} className="bg-slate-50 p-3 rounded-lg border border-slate-200 mb-4">
+      <form onSubmit={handleAddCustomExpense} className="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-lg border border-slate-200 dark:border-slate-700 mb-4">
         <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center">
           <div className="sm:col-span-4">
             <select
@@ -228,7 +228,7 @@ export const ExpensesSection: React.FC<ExpensesSectionProps> = ({
                   setSelectedCategory(e.target.value);
                 }
               }}
-              className="w-full px-2.5 py-2 bg-white text-xs rounded border border-slate-300 font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-rose-500"
+              className="w-full px-2.5 py-2 bg-white dark:bg-slate-900 text-xs rounded border border-slate-300 dark:border-slate-700 font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-rose-500"
             >
               {categories.map(cat => (
                 <option key={cat.id} value={cat.name}>
@@ -245,13 +245,13 @@ export const ExpensesSection: React.FC<ExpensesSectionProps> = ({
               value={newDescription}
               onChange={e => setNewDescription(e.target.value)}
               placeholder="Description (optional)"
-              className="w-full px-2.5 py-2 bg-white text-xs rounded border border-slate-300 font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-rose-500"
+              className="w-full px-2.5 py-2 bg-white dark:bg-slate-900 text-xs rounded border border-slate-300 dark:border-slate-700 font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-rose-500"
             />
           </div>
 
           <div className="sm:col-span-3">
             <div className="relative">
-              <span className="absolute inset-y-0 left-0 pl-2.5 flex items-center text-slate-400 text-xs font-semibold pointer-events-none">
+              <span className="absolute inset-y-0 left-0 pl-2.5 flex items-center text-slate-400 dark:text-slate-500 text-xs font-semibold pointer-events-none">
                 ₹
               </span>
               <input
@@ -261,7 +261,7 @@ export const ExpensesSection: React.FC<ExpensesSectionProps> = ({
                 value={newAmount}
                 onChange={e => setNewAmount(e.target.value)}
                 placeholder="Amount (₹)"
-                className="w-full pl-6 pr-2.5 py-2 bg-white text-sm rounded border border-slate-300 font-bold text-slate-900 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                className="w-full pl-6 pr-2.5 py-2 bg-white dark:bg-slate-900 text-sm rounded border border-slate-300 dark:border-slate-700 font-bold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-rose-500"
               />
             </div>
           </div>
@@ -280,21 +280,21 @@ export const ExpensesSection: React.FC<ExpensesSectionProps> = ({
 
       {/* Itemized List */}
       {expenses.length === 0 ? (
-        <div className="text-center py-6 border-2 border-dashed border-slate-200 rounded-lg">
-          <p className="text-xs text-slate-500 m-0">No expenses recorded</p>
+        <div className="text-center py-6 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-lg">
+          <p className="text-xs text-slate-500 dark:text-slate-400 m-0">No expenses recorded</p>
         </div>
       ) : (
-        <div className="divide-y divide-slate-100 border border-slate-200 rounded-lg overflow-hidden bg-white">
+        <div className="divide-y divide-slate-100 dark:divide-slate-800 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden bg-white dark:bg-slate-900">
           {expenses.map((expense, idx) => (
             <div
               key={expense.id}
-              className="p-3 hover:bg-slate-50/70 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+              className="p-3 hover:bg-slate-50/70 dark:hover:bg-slate-800/50 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-2"
             >
               <div className="flex items-center space-x-2.5 flex-1 min-w-0">
-                <span className="text-2xs font-bold text-slate-400 w-4">{idx + 1}</span>
+                <span className="text-2xs font-bold text-slate-400 dark:text-slate-500 w-4">{idx + 1}</span>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center space-x-1.5">
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-2xs font-semibold bg-rose-50 text-rose-700 border border-rose-100">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-2xs font-semibold bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-100 dark:border-rose-900">
                       <Tag className="w-2.5 h-2.5 mr-1" />
                       {expense.category_name}
                     </span>
@@ -304,14 +304,14 @@ export const ExpensesSection: React.FC<ExpensesSectionProps> = ({
                     value={expense.description}
                     onChange={e => handleUpdateExpense(expense.id, { description: e.target.value })}
                     placeholder="Add description..."
-                    className="w-full mt-1 text-xs text-slate-700 bg-transparent border-0 border-b border-transparent hover:border-slate-300 focus:border-rose-500 focus:outline-none focus:bg-white py-0.5"
+                    className="w-full mt-1 text-xs text-slate-700 dark:text-slate-300 bg-transparent border-0 border-b border-transparent hover:border-slate-300 dark:hover:border-slate-700 focus:border-rose-500 focus:outline-none focus:bg-white dark:focus:bg-slate-800 py-0.5"
                   />
                 </div>
               </div>
 
               <div className="flex items-center space-x-3 self-end sm:self-auto">
                 <div className="relative w-32">
-                  <span className="absolute inset-y-0 left-0 pl-2 flex items-center text-slate-400 text-xs font-semibold pointer-events-none">
+                  <span className="absolute inset-y-0 left-0 pl-2 flex items-center text-slate-400 dark:text-slate-500 text-xs font-semibold pointer-events-none">
                     ₹
                   </span>
                   <input
@@ -323,13 +323,13 @@ export const ExpensesSection: React.FC<ExpensesSectionProps> = ({
                       handleUpdateExpense(expense.id, { amount_paise: rupeesToPaise(e.target.value) })
                     }
                     placeholder="0.00"
-                    className="w-full pl-5 pr-2 py-1 text-sm bg-slate-50 rounded border border-slate-200 font-bold text-slate-900 text-right focus:outline-none focus:bg-white focus:border-rose-500"
+                    className="w-full pl-5 pr-2 py-1 text-sm bg-slate-50 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 font-bold text-slate-900 dark:text-slate-100 text-right focus:outline-none focus:bg-white dark:focus:bg-slate-900 focus:border-rose-500"
                   />
                 </div>
                 <button
                   type="button"
                   onClick={() => handleRemoveExpense(expense.id)}
-                  className="p-1.5 text-slate-400 hover:text-rose-600 rounded transition-colors"
+                  className="p-1.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 rounded transition-colors"
                   title="Delete expense"
                 >
                   <Trash2 className="w-4 h-4" />
