@@ -1,6 +1,7 @@
 import React from 'react';
 import type { CashMemoItem } from '../../types/statement';
 import { paiseToRupees, rupeesToPaise, formatPaiseToINR, calculateTotalCashMemos } from '../../lib/calculations';
+import { generateUuid } from '../../lib/supabase';
 import { Receipt, Plus, Trash2, AlertTriangle } from 'lucide-react';
 
 interface CashMemosSectionProps {
@@ -13,7 +14,7 @@ export const CashMemosSection: React.FC<CashMemosSectionProps> = ({ memos, onCha
 
   const handleAddMemo = () => {
     const newMemo: CashMemoItem = {
-      id: `memo-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      id: generateUuid(),
       from_number: '',
       to_number: '',
       source: 'Dine-in / Counter',

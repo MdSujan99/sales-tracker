@@ -14,24 +14,62 @@ export const supabase: SupabaseClient | null = isSupabaseConfigured
   ? createClient(supabaseUrl, supabaseAnonKey)
   : null;
 
+// UUID validation and generation helpers
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+export function isValidUuid(str: string | null | undefined): boolean {
+  if (!str) return false;
+  return UUID_REGEX.test(str);
+}
+
+export function generateUuid(): string {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
+// Default Restaurant ID
+export const DEFAULT_RESTAURANT_ID = '00000000-0000-0000-0000-000000000001';
+
 // LocalStorage keys for offline / unconfigured demo mode
 const LOCAL_STORAGE_STATEMENTS_KEY = 'restaurant_daily_statements_v1';
 const LOCAL_STORAGE_CATEGORIES_KEY = 'restaurant_expense_categories_v1';
 
 export const DEFAULT_CATEGORIES: ExpenseCategory[] = [
-  { id: 'cat-1', name: 'Vegetables / Mandi', display_order: 1, is_active: true, is_predefined: true },
-  { id: 'cat-2', name: 'Meat / Poultry / Fish', display_order: 2, is_active: true, is_predefined: true },
-  { id: 'cat-3', name: 'Dairy / Milk / Paneer', display_order: 3, is_active: true, is_predefined: true },
-  { id: 'cat-4', name: 'Bakery / Breads', display_order: 4, is_active: true, is_predefined: true },
-  { id: 'cat-5', name: 'Gas / Commercial Cylinders', display_order: 5, is_active: true, is_predefined: true },
-  { id: 'cat-6', name: 'Packaging & Disposables', display_order: 6, is_active: true, is_predefined: true },
-  { id: 'cat-7', name: 'Daily Wages / Labour', display_order: 7, is_active: true, is_predefined: true },
-  { id: 'cat-8', name: 'Maintenance & Repairs', display_order: 8, is_active: true, is_predefined: true },
-  { id: 'cat-9', name: 'Cleaning & Sanitation', display_order: 9, is_active: true, is_predefined: true },
-  { id: 'cat-10', name: 'Ice & Beverages', display_order: 10, is_active: true, is_predefined: true },
-  { id: 'cat-11', name: 'Staff Tea & Refreshment', display_order: 11, is_active: true, is_predefined: true },
-  { id: 'cat-12', name: 'Miscellaneous Cash Expenses', display_order: 12, is_active: true, is_predefined: true },
+  { id: '11111111-0000-0000-0000-000000000001', name: 'Vegetables / Mandi', display_order: 1, is_active: true, is_predefined: true },
+  { id: '11111111-0000-0000-0000-000000000002', name: 'Meat / Poultry / Fish', display_order: 2, is_active: true, is_predefined: true },
+  { id: '11111111-0000-0000-0000-000000000003', name: 'Dairy / Milk / Paneer', display_order: 3, is_active: true, is_predefined: true },
+  { id: '11111111-0000-0000-0000-000000000004', name: 'Bakery / Breads', display_order: 4, is_active: true, is_predefined: true },
+  { id: '11111111-0000-0000-0000-000000000005', name: 'Gas / Commercial Cylinders', display_order: 5, is_active: true, is_predefined: true },
+  { id: '11111111-0000-0000-0000-000000000006', name: 'Packaging & Disposables', display_order: 6, is_active: true, is_predefined: true },
+  { id: '11111111-0000-0000-0000-000000000007', name: 'Daily Wages / Labour', display_order: 7, is_active: true, is_predefined: true },
+  { id: '11111111-0000-0000-0000-000000000008', name: 'Maintenance & Repairs', display_order: 8, is_active: true, is_predefined: true },
+  { id: '11111111-0000-0000-0000-000000000009', name: 'Cleaning & Sanitation', display_order: 9, is_active: true, is_predefined: true },
+  { id: '11111111-0000-0000-0000-000000000010', name: 'Ice & Beverages', display_order: 10, is_active: true, is_predefined: true },
+  { id: '11111111-0000-0000-0000-000000000011', name: 'Staff Tea & Refreshment', display_order: 11, is_active: true, is_predefined: true },
+  { id: '11111111-0000-0000-0000-000000000012', name: 'Miscellaneous Cash Expenses', display_order: 12, is_active: true, is_predefined: true },
 ];
+
+/**
+ * Extracts a readable error message from Supabase or Postgrest error objects.
+ */
+function extractErrorMessage(err: unknown): string {
+  if (!err) return 'Unknown database error';
+  if (typeof err === 'string') return err;
+  if (typeof err === 'object') {
+    const errorObj = err as Record<string, unknown>;
+    if (errorObj.message) {
+      return `${errorObj.message}${errorObj.details ? ` (${errorObj.details})` : ''}${errorObj.hint ? ` [Hint: ${errorObj.hint}]` : ''}`;
+    }
+    if (errorObj.error_description) return String(errorObj.error_description);
+  }
+  return JSON.stringify(err);
+}
 
 /**
  * Loads categories from Supabase, or falls back to localStorage / defaults.
@@ -97,18 +135,39 @@ export async function getStatements(): Promise<DailyStatement[]> {
 }
 
 /**
- * Saves or updates a daily statement.
+ * Saves or updates a daily statement with complete UUID validation and error reporting.
  */
 export async function saveStatementToDb(statement: DailyStatement): Promise<{ success: boolean; error?: string }> {
+  // Ensure the statement has a valid UUID
+  const validStatementId = isValidUuid(statement.id) ? statement.id : generateUuid();
+  const validRestaurantId = isValidUuid(statement.restaurant_id) ? statement.restaurant_id : DEFAULT_RESTAURANT_ID;
+
+  const normalizedStatement: DailyStatement = {
+    ...statement,
+    id: validStatementId,
+    restaurant_id: validRestaurantId,
+    // Only pass created_by if it's a valid Supabase auth UUID, else null
+    created_by: isValidUuid(statement.created_by) ? statement.created_by : undefined,
+    cash_memos: (statement.cash_memos || []).map(m => ({
+      ...m,
+      id: isValidUuid(m.id) ? m.id : generateUuid(),
+    })),
+    expense_entries: (statement.expense_entries || []).map(e => ({
+      ...e,
+      id: isValidUuid(e.id) ? e.id : generateUuid(),
+      category_id: isValidUuid(e.category_id) ? e.category_id : undefined,
+    })),
+  };
+
   // Always keep localStorage updated as immediate backup
   try {
     const existingStr = localStorage.getItem(LOCAL_STORAGE_STATEMENTS_KEY);
     let list: DailyStatement[] = existingStr ? JSON.parse(existingStr) : [];
-    const index = list.findIndex(s => s.id === statement.id || s.business_date === statement.business_date);
+    const index = list.findIndex(s => s.id === normalizedStatement.id || s.business_date === normalizedStatement.business_date);
     if (index >= 0) {
-      list[index] = statement;
+      list[index] = normalizedStatement;
     } else {
-      list.unshift(statement);
+      list.unshift(normalizedStatement);
     }
     localStorage.setItem(LOCAL_STORAGE_STATEMENTS_KEY, JSON.stringify(list));
   } catch (err) {
@@ -121,33 +180,50 @@ export async function saveStatementToDb(statement: DailyStatement): Promise<{ su
       const {
         cash_memos,
         expense_entries,
+        created_by,
         ...statementData
-      } = statement;
+      } = normalizedStatement;
 
       // 1. Upsert statement header
+      const payload: Record<string, unknown> = {
+        ...statementData,
+        id: validStatementId,
+        restaurant_id: validRestaurantId,
+        created_by: isValidUuid(created_by) ? created_by : null,
+      };
+
       const { error: stmtError } = await supabase
         .from('daily_statements')
-        .upsert(statementData, { onConflict: 'restaurant_id,business_date' });
+        .upsert(payload, { onConflict: 'restaurant_id,business_date' });
 
       if (stmtError) throw stmtError;
 
-      // 2. Delete and re-insert cash memos
-      await supabase.from('cash_memos').delete().eq('statement_id', statement.id);
+      // 2. Delete existing cash memos for this statement and re-insert
+      await supabase.from('cash_memos').delete().eq('statement_id', validStatementId);
       if (cash_memos && cash_memos.length > 0) {
         const memosToInsert = cash_memos.map(m => ({
-          ...m,
-          statement_id: statement.id,
+          id: isValidUuid(m.id) ? m.id : generateUuid(),
+          statement_id: validStatementId,
+          from_number: m.from_number || '',
+          to_number: m.to_number || '',
+          source: m.source || '',
+          amount_paise: m.amount_paise || 0,
         }));
         const { error: memoError } = await supabase.from('cash_memos').insert(memosToInsert);
         if (memoError) throw memoError;
       }
 
-      // 3. Delete and re-insert expense entries
-      await supabase.from('expense_entries').delete().eq('statement_id', statement.id);
+      // 3. Delete existing expenses for this statement and re-insert
+      await supabase.from('expense_entries').delete().eq('statement_id', validStatementId);
       if (expense_entries && expense_entries.length > 0) {
         const expensesToInsert = expense_entries.map(e => ({
-          ...e,
-          statement_id: statement.id,
+          id: isValidUuid(e.id) ? e.id : generateUuid(),
+          statement_id: validStatementId,
+          category_id: isValidUuid(e.category_id) ? e.category_id : null,
+          category_name: e.category_name,
+          description: e.description || '',
+          amount_paise: e.amount_paise || 0,
+          notes: e.notes || null,
         }));
         const { error: expError } = await supabase.from('expense_entries').insert(expensesToInsert);
         if (expError) throw expError;
@@ -155,7 +231,7 @@ export async function saveStatementToDb(statement: DailyStatement): Promise<{ su
 
       return { success: true };
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Unknown database error';
+      const message = extractErrorMessage(err);
       console.error('Supabase persistence error:', message);
       return { success: false, error: message };
     }
