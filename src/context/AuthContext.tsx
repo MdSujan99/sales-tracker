@@ -26,16 +26,16 @@ interface AuthContextType {
 }
 
 const DEFAULT_USER: UserProfile = {
-  id: 'user-accountant-01',
+  id: '00000000-0000-0000-0000-000000000002',
   email: 'accountant@restaurant.com',
-  name: 'Head Accountant',
+  name: 'Accountant',
   role: 'ACCOUNTANT',
 };
 
 const DEFAULT_RESTAURANT: RestaurantProfile = {
   id: '00000000-0000-0000-0000-000000000001',
-  name: 'Royal Spice Restaurant',
-  branch: 'Main City Branch',
+  name: 'Daily Cash Statement',
+  branch: 'Main Branch',
   currency: 'INR',
 };
 
@@ -49,7 +49,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const [restaurant, setRestaurant] = useState<RestaurantProfile>(() => {
     const saved = localStorage.getItem('app_restaurant_profile');
-    return saved ? JSON.parse(saved) : DEFAULT_RESTAURANT;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed.name === 'Royal Spice Restaurant') {
+          return DEFAULT_RESTAURANT;
+        }
+        return parsed;
+      } catch {
+        // Fallback
+      }
+    }
+    return DEFAULT_RESTAURANT;
   });
 
   const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
