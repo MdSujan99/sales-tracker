@@ -3,6 +3,7 @@ export type StatementStatus = 'DRAFT' | 'FINALIZED';
 export type UserRole = 'ACCOUNTANT' | 'OWNER' | 'ADMIN';
 
 export interface SalesBreakdown {
+  total_sales_paise?: number;
   cash_sales_paise: number;
   upi_sales_paise: number;
   card_sales_paise: number;
@@ -60,6 +61,7 @@ export interface DailyStatement {
   
   // Summary & Reconciliation
   net_difference_paise: number; // total_sales - total_expenses
+  cash_in_hand_paise?: number; // cash_sales - total_expenses
   entered_account_sales_paise?: number; // Optional entered total from paper
   entered_account_expenses_paise?: number; // Optional entered total from paper
   closing_cash_paise?: number;

@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import type { ExpenseItem, ExpenseCategory } from '../../types/statement';
 import { paiseToRupees, rupeesToPaise, formatPaiseToINR, calculateTotalExpenses } from '../../lib/calculations';
-import { generateUuid } from '../../lib/supabase';
-import { ShoppingBag, Plus, Trash2, Tag, AlertCircle } from 'lucide-react';
+import { generateUuid, saveExpenseCategory, deleteExpenseCategory } from '../../lib/supabase';
+import { ShoppingBag, Plus, Trash2, Tag, AlertCircle, FolderPlus, X } from 'lucide-react';
 
 interface ExpensesSectionProps {
   expenses: ExpenseItem[];
   categories: ExpenseCategory[];
   onChange: (updated: ExpenseItem[]) => void;
+  onAddCategory?: (newCategory: ExpenseCategory) => void;
+  onRemoveCategory?: (categoryId: string) => void;
   enteredAccountExpensesPaise?: number;
   onEnteredAccountExpensesChange?: (val: number | undefined) => void;
 }
@@ -16,14 +18,59 @@ export const ExpensesSection: React.FC<ExpensesSectionProps> = ({
   expenses,
   categories,
   onChange,
+  onAddCategory,
+  onRemoveCategory,
   enteredAccountExpensesPaise,
   onEnteredAccountExpensesChange,
 }) => {
-  const [selectedCategory, setSelectedCategory] = useState<string>(categories[0]?.name || 'Vegetables / Mandi');
+  const [selectedCategory, setSelectedCategory] = useState<string>(
+    categories[0]?.name || 'Vegetables / Mandi'
+  );
   const [newDescription, setNewDescription] = useState<string>('');
   const [newAmount, setNewAmount] = useState<string>('');
 
+  // Custom Category Creation State
+  const [isAddingCategory, setIsAddingCategory] = useState<boolean>(false);
+  const [newCategoryName, setNewCategoryName] = useState<string>('');
+  const [categoryError, setCategoryError] = useState<string | null>(null);
+  const [isSavingCategory, setIsSavingCategory] = useState<boolean>(false);
+
   const totalExpensesPaise = calculateTotalExpenses(expenses);
+
+  const handleCreateCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = newCategoryName.trim();
+    if (!trimmed) {
+      setCategoryError('Category name is required.');
+      return;
+    }
+
+    try {
+      setIsSavingCategory(true);
+      setCategoryError(null);
+      const saved = await saveExpenseCategory(trimmed);
+      onAddCategory?.(saved);
+      setSelectedCategory(saved.name);
+      setNewCategoryName('');
+      setIsAddingCategory(false);
+    } catch (err: unknown) {
+      setCategoryError(err instanceof Error ? err.message : 'Could not create category.');
+    } finally {
+      setIsSavingCategory(false);
+    }
+  };
+
+  const handleDeleteCustomCategory = async (cat: ExpenseCategory, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (cat.is_predefined) return;
+    if (confirm(`Delete custom category "${cat.name}"?`)) {
+      await deleteExpenseCategory(cat.id);
+      onRemoveCategory?.(cat.id);
+      if (selectedCategory === cat.name) {
+        setSelectedCategory(categories[0]?.name || '');
+      }
+    }
+  };
 
   const handleAddCustomExpense = (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,6 +118,7 @@ export const ExpensesSection: React.FC<ExpensesSectionProps> = ({
 
   return (
     <div className="bg-white rounded-xl shadow-xs border border-slate-200 p-4 sm:p-6 mb-6">
+      {/* Section Header */}
       <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
         <div className="flex items-center space-x-2">
           <div className="p-1.5 rounded-md bg-rose-50 text-rose-600">
@@ -91,22 +139,92 @@ export const ExpensesSection: React.FC<ExpensesSectionProps> = ({
         </div>
       </div>
 
-      {/* Quick Add Pills for standard categories */}
+      {/* Quick Add Pills & Custom Category Trigger */}
       <div className="mb-4">
-        <label className="block text-2xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
-          Quick-Add Category from Paper Form:
-        </label>
+        <div className="flex items-center justify-between mb-1.5">
+          <label className="block text-2xs font-semibold uppercase tracking-wider text-slate-500">
+            Quick-Add Category from Cash Book:
+          </label>
+          <button
+            type="button"
+            onClick={() => setIsAddingCategory(prev => !prev)}
+            className="inline-flex items-center text-xs font-bold text-rose-600 hover:text-rose-700 hover:underline transition-colors"
+          >
+            <FolderPlus className="w-3.5 h-3.5 mr-1" />
+            {isAddingCategory ? 'Close' : '+ Add Custom Category'}
+          </button>
+        </div>
+
+        {/* Collapsible Create Custom Category Form */}
+        {isAddingCategory && (
+          <form
+            onSubmit={handleCreateCategory}
+            className="mb-3 p-3 bg-rose-50/70 border border-rose-200 rounded-lg flex flex-col sm:flex-row items-stretch sm:items-center gap-2 animate-fade-in"
+          >
+            <div className="flex-1">
+              <input
+                type="text"
+                value={newCategoryName}
+                onChange={e => {
+                  setNewCategoryName(e.target.value);
+                  if (categoryError) setCategoryError(null);
+                }}
+                placeholder="New Category Name (e.g. Generator Fuel, Rent, Pooja Expenses)"
+                className="w-full px-3 py-1.5 text-xs bg-white rounded border border-rose-300 font-medium text-slate-900 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                autoFocus
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <button
+                type="submit"
+                disabled={isSavingCategory}
+                className="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded text-xs font-bold transition-colors disabled:opacity-50"
+              >
+                {isSavingCategory ? 'Saving...' : 'Save Category'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsAddingCategory(false);
+                  setCategoryError(null);
+                }}
+                className="px-2.5 py-1.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded text-xs font-semibold"
+              >
+                Cancel
+              </button>
+            </div>
+            {categoryError && (
+              <p className="w-full text-2xs font-bold text-rose-600 m-0">{categoryError}</p>
+            )}
+          </form>
+        )}
+
+        {/* Quick Add Badges */}
         <div className="flex flex-wrap gap-1.5">
-          {categories.slice(0, 8).map(cat => (
-            <button
-              key={cat.id}
-              type="button"
-              onClick={() => handleQuickAddCategory(cat)}
-              className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 border border-slate-200 transition-colors"
-            >
-              <Plus className="w-3 h-3 mr-1" />
-              {cat.name}
-            </button>
+          {categories.map(cat => (
+            <div key={cat.id} className="inline-flex items-center">
+              <button
+                type="button"
+                onClick={() => handleQuickAddCategory(cat)}
+                className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${
+                  cat.is_predefined
+                    ? 'bg-slate-100 text-slate-700 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 border-slate-200'
+                    : 'bg-rose-50/90 text-rose-800 hover:bg-rose-100 border-rose-300 font-semibold'
+                }`}
+              >
+                <Plus className="w-3 h-3 mr-1" />
+                {cat.name}
+                {!cat.is_predefined && (
+                  <span
+                    onClick={e => handleDeleteCustomCategory(cat, e)}
+                    className="ml-1.5 p-0.5 rounded-full hover:bg-rose-200 text-rose-500 hover:text-rose-800"
+                    title="Delete custom category"
+                  >
+                    <X className="w-2.5 h-2.5" />
+                  </span>
+                )}
+              </button>
+            </div>
           ))}
         </div>
       </div>
@@ -117,14 +235,21 @@ export const ExpensesSection: React.FC<ExpensesSectionProps> = ({
           <div className="sm:col-span-4">
             <select
               value={selectedCategory}
-              onChange={e => setSelectedCategory(e.target.value)}
+              onChange={e => {
+                if (e.target.value === '__NEW__') {
+                  setIsAddingCategory(true);
+                } else {
+                  setSelectedCategory(e.target.value);
+                }
+              }}
               className="w-full px-2.5 py-2 bg-white text-xs rounded border border-slate-300 font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-rose-500"
             >
               {categories.map(cat => (
                 <option key={cat.id} value={cat.name}>
-                  {cat.name}
+                  {cat.name} {!cat.is_predefined ? '(Custom)' : ''}
                 </option>
               ))}
+              <option value="__NEW__">+ Add Custom Category...</option>
             </select>
           </div>
 
@@ -175,7 +300,10 @@ export const ExpensesSection: React.FC<ExpensesSectionProps> = ({
       ) : (
         <div className="divide-y divide-slate-100 border border-slate-200 rounded-lg overflow-hidden bg-white">
           {expenses.map((expense, idx) => (
-            <div key={expense.id} className="p-3 hover:bg-slate-50/70 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div
+              key={expense.id}
+              className="p-3 hover:bg-slate-50/70 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+            >
               <div className="flex items-center space-x-2.5 flex-1 min-w-0">
                 <span className="text-2xs font-bold text-slate-400 w-4">{idx + 1}</span>
                 <div className="min-w-0 flex-1">

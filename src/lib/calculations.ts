@@ -49,8 +49,12 @@ export function formatPaiseToINR(paise: number, showDecimals: boolean = true): s
 
 /**
  * Calculates sum of all confirmed sales channels in integer paise.
+ * If total_sales_paise is explicitly specified and non-zero, returns it.
  */
 export function calculateTotalSales(sales: SalesBreakdown): number {
+  if (sales.total_sales_paise !== undefined && sales.total_sales_paise > 0) {
+    return sales.total_sales_paise;
+  }
   return (
     (sales.cash_sales_paise || 0) +
     (sales.upi_sales_paise || 0) +
@@ -58,6 +62,35 @@ export function calculateTotalSales(sales: SalesBreakdown): number {
     (sales.delivery_sales_paise || 0) +
     (sales.other_sales_paise || 0)
   );
+}
+
+/**
+ * Calculates derived Cash Sales: Total Sales minus all non-cash sales channels.
+ * Cash Sales = Total Sales - (Delivery + Card + UPI + Other)
+ */
+export function calculateCashSales(
+  totalSalesPaise: number,
+  nonCash: {
+    delivery_sales_paise?: number;
+    card_sales_paise?: number;
+    upi_sales_paise?: number;
+    other_sales_paise?: number;
+  }
+): number {
+  const nonCashTotal =
+    (nonCash.delivery_sales_paise || 0) +
+    (nonCash.card_sales_paise || 0) +
+    (nonCash.upi_sales_paise || 0) +
+    (nonCash.other_sales_paise || 0);
+  return (totalSalesPaise || 0) - nonCashTotal;
+}
+
+/**
+ * Calculates Cash in Hand: Cash Sales - Total Expenses.
+ * Represents the physical cash remaining in the drawer/till after paying operational expenses.
+ */
+export function calculateCashInHand(cashSalesPaise: number, totalExpensesPaise: number): number {
+  return (cashSalesPaise || 0) - (totalExpensesPaise || 0);
 }
 
 /**
@@ -145,6 +178,23 @@ export function reconcileStatement(statement: Partial<DailyStatement>): Reconcil
       if (memo.amount_paise < 0) {
         errors.push(`Cash memo amount cannot be negative.`);
       }
+    }
+  }
+
+  // Check derived cash sales
+  if (statement.cash_sales_paise !== undefined && statement.cash_sales_paise < 0) {
+    errors.push(
+      `Non-cash sales channels exceed Total Sales by ${formatPaiseToINR(Math.abs(statement.cash_sales_paise))}. Derived Cash Sales cannot be negative.`
+    );
+  }
+
+  // Check cash in hand (Cash Sales - Expenses)
+  if (statement.cash_sales_paise !== undefined && statement.cash_sales_paise >= 0) {
+    const cashInHand = calculateCashInHand(statement.cash_sales_paise, calculatedExpenses);
+    if (cashInHand < 0 && calculatedExpenses > 0) {
+      warnings.push(
+        `Total expenses (${formatPaiseToINR(calculatedExpenses)}) exceed cash sales (${formatPaiseToINR(statement.cash_sales_paise)}). Cash in hand is negative (${formatPaiseToINR(cashInHand)}).`
+      );
     }
   }
 

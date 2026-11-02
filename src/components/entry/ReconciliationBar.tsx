@@ -1,10 +1,12 @@
 import React from 'react';
 import type { ReconciliationResult } from '../../types/statement';
 import { formatPaiseToINR } from '../../lib/calculations';
-import { CheckCircle2, AlertTriangle, AlertCircle, Save, Check } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, AlertCircle, Save, Check, Wallet, Banknote, Unlock } from 'lucide-react';
 
 interface ReconciliationBarProps {
   totalSalesPaise: number;
+  cashSalesPaise: number;
+  cashInHandPaise: number;
   totalExpensesPaise: number;
   totalCashMemosPaise: number;
   netDifferencePaise: number;
@@ -13,12 +15,16 @@ interface ReconciliationBarProps {
   onNotesChange: (notes: string) => void;
   onSaveDraft: () => void;
   onFinalize: () => void;
+  onUnlock?: () => void;
   isSaving: boolean;
   status: 'DRAFT' | 'FINALIZED';
+  isConflict?: boolean;
 }
 
 export const ReconciliationBar: React.FC<ReconciliationBarProps> = ({
   totalSalesPaise,
+  cashSalesPaise,
+  cashInHandPaise,
   totalExpensesPaise,
   totalCashMemosPaise,
   netDifferencePaise,
@@ -27,60 +33,117 @@ export const ReconciliationBar: React.FC<ReconciliationBarProps> = ({
   onNotesChange,
   onSaveDraft,
   onFinalize,
+  onUnlock,
   isSaving,
   status,
+  isConflict = false,
 }) => {
   return (
     <div className="space-y-4">
-      {/* 4. Live Calculated Reconciliation Cards */}
+      {/* Statement Summary & Reconciliation Header */}
       <div className="bg-slate-900 text-white rounded-xl shadow-md p-4 sm:p-6">
-        <h2 className="text-xs uppercase tracking-wider font-bold text-slate-400 mb-4 m-0">
-          4. Statement Summary & Reconciliation
-        </h2>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-800 mb-4 gap-2">
+          <div>
+            <h2 className="text-xs uppercase tracking-wider font-extrabold text-amber-400 m-0">
+              4. Statement Summary & Reconciliation
+            </h2>
+            <p className="text-2xs text-slate-400 mt-0.5 m-0">
+              Real-time financial balancing: Cash Sales − Expenses = Cash in Hand
+            </p>
+          </div>
+          <div className="text-2xs text-slate-400 flex items-center space-x-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>Balanced in Integer Paise</span>
+          </div>
+        </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+        {/* 6 Key Metric Cards Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-3.5 mb-6">
           {/* Total Sales */}
-          <div className="bg-slate-800/80 p-3.5 rounded-lg border border-slate-700/60">
+          <div className="bg-slate-800/80 p-3 rounded-lg border border-slate-700/60">
             <span className="text-2xs font-semibold text-slate-400 uppercase tracking-wider block">
               Total Sales
             </span>
-            <span className="text-lg sm:text-xl font-extrabold text-emerald-400 block mt-1">
+            <span className="text-base sm:text-lg font-black text-amber-400 block mt-1">
               {formatPaiseToINR(totalSalesPaise)}
             </span>
+            <span className="text-3xs text-slate-500 block mt-0.5">Register / POS total</span>
+          </div>
+
+          {/* Cash Sales (Derived) */}
+          <div className="bg-slate-800/80 p-3 rounded-lg border border-slate-700/60">
+            <span className="text-2xs font-semibold text-slate-400 uppercase tracking-wider block flex items-center">
+              <Banknote className="w-3 h-3 mr-1 text-emerald-400" />
+              Cash Sales
+            </span>
+            <span
+              className={`text-base sm:text-lg font-black block mt-1 ${
+                cashSalesPaise >= 0 ? 'text-emerald-400' : 'text-rose-400'
+              }`}
+            >
+              {formatPaiseToINR(cashSalesPaise)}
+            </span>
+            <span className="text-3xs text-slate-500 block mt-0.5">Total − non-cash</span>
           </div>
 
           {/* Total Expenses */}
-          <div className="bg-slate-800/80 p-3.5 rounded-lg border border-slate-700/60">
+          <div className="bg-slate-800/80 p-3 rounded-lg border border-slate-700/60">
             <span className="text-2xs font-semibold text-slate-400 uppercase tracking-wider block">
               Total Expenses
             </span>
-            <span className="text-lg sm:text-xl font-extrabold text-rose-400 block mt-1">
+            <span className="text-base sm:text-lg font-black text-rose-400 block mt-1">
               {formatPaiseToINR(totalExpensesPaise)}
             </span>
+            <span className="text-3xs text-slate-500 block mt-0.5">Paid from cash</span>
           </div>
 
-          {/* Net Difference */}
-          <div className="bg-slate-800/80 p-3.5 rounded-lg border border-slate-700/60">
-            <span className="text-2xs font-semibold text-slate-400 uppercase tracking-wider block">
-              Net Diff (Sales - Exp)
-            </span>
+          {/* Cash in Hand (Cash Sales - Expenses) -> Highlighted Hero Card */}
+          <div className="bg-gradient-to-br from-emerald-950/70 to-slate-800 p-3 rounded-lg border-2 border-emerald-500/80 shadow-xs relative">
+            <div className="flex items-center justify-between">
+              <span className="text-2xs font-black text-emerald-300 uppercase tracking-wider block flex items-center">
+                <Wallet className="w-3 h-3 mr-1 text-emerald-400" />
+                Cash in Hand
+              </span>
+              <span className="text-3xs font-bold px-1.5 py-0.2 bg-emerald-500/20 text-emerald-300 rounded border border-emerald-500/40">
+                Drawer
+              </span>
+            </div>
             <span
-              className={`text-lg sm:text-xl font-extrabold block mt-1 ${
-                netDifferencePaise >= 0 ? 'text-amber-400' : 'text-rose-500'
+              className={`text-base sm:text-lg font-black block mt-1 ${
+                cashInHandPaise >= 0 ? 'text-emerald-300' : 'text-rose-400'
               }`}
             >
-              {formatPaiseToINR(netDifferencePaise)}
+              {formatPaiseToINR(cashInHandPaise)}
+            </span>
+            <span className="text-3xs text-emerald-400/80 font-medium block mt-0.5 truncate">
+              Cash Sales − Expenses
             </span>
           </div>
 
           {/* Cash Memos */}
-          <div className="bg-slate-800/80 p-3.5 rounded-lg border border-slate-700/60">
+          <div className="bg-slate-800/80 p-3 rounded-lg border border-slate-700/60">
             <span className="text-2xs font-semibold text-slate-400 uppercase tracking-wider block">
-              Cash Memos Total
+              Cash Memos
             </span>
-            <span className="text-lg sm:text-xl font-extrabold text-blue-400 block mt-1">
+            <span className="text-base sm:text-lg font-black text-blue-400 block mt-1">
               {formatPaiseToINR(totalCashMemosPaise)}
             </span>
+            <span className="text-3xs text-slate-500 block mt-0.5">Physical bill books</span>
+          </div>
+
+          {/* Net Diff (Total Sales - Expenses) */}
+          <div className="bg-slate-800/80 p-3 rounded-lg border border-slate-700/60">
+            <span className="text-2xs font-semibold text-slate-400 uppercase tracking-wider block">
+              Net Revenue
+            </span>
+            <span
+              className={`text-base sm:text-lg font-black block mt-1 ${
+                netDifferencePaise >= 0 ? 'text-amber-400' : 'text-rose-400'
+              }`}
+            >
+              {formatPaiseToINR(netDifferencePaise)}
+            </span>
+            <span className="text-3xs text-slate-500 block mt-0.5">Total Sales − Exp</span>
           </div>
         </div>
 
@@ -116,7 +179,9 @@ export const ReconciliationBar: React.FC<ReconciliationBarProps> = ({
         {reconciliation.isValid && reconciliation.warnings.length === 0 && (
           <div className="mb-4 bg-emerald-950/60 border border-emerald-800/60 rounded-lg p-2.5 text-xs text-emerald-300 flex items-center space-x-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span>All figures balance cleanly with no discrepancies or warnings.</span>
+            <span>
+              All figures balance cleanly. Physical cash in hand: {formatPaiseToINR(cashInHandPaise)}.
+            </span>
           </div>
         )}
 
@@ -153,25 +218,40 @@ export const ReconciliationBar: React.FC<ReconciliationBarProps> = ({
         </div>
 
         <div className="flex items-center space-x-2.5">
-          <button
-            type="button"
-            disabled={isSaving}
-            onClick={onSaveDraft}
-            className="inline-flex items-center px-4 py-2 rounded-lg text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-300 transition-colors disabled:opacity-50"
-          >
-            <Save className="w-3.5 h-3.5 mr-1.5" />
-            {isSaving ? 'Saving...' : 'Save Draft'}
-          </button>
+          {status === 'FINALIZED' ? (
+            onUnlock && (
+              <button
+                type="button"
+                onClick={onUnlock}
+                className="inline-flex items-center px-4 py-2 rounded-lg text-xs font-bold bg-amber-600 text-white hover:bg-amber-700 shadow-xs transition-colors"
+              >
+                <Unlock className="w-3.5 h-3.5 mr-1.5" />
+                Unlock to Edit
+              </button>
+            )
+          ) : (
+            <>
+              <button
+                type="button"
+                disabled={isSaving || isConflict}
+                onClick={onSaveDraft}
+                className="inline-flex items-center px-4 py-2 rounded-lg text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-300 transition-colors disabled:opacity-50"
+              >
+                <Save className="w-3.5 h-3.5 mr-1.5" />
+                {isSaving ? 'Saving...' : 'Save Draft'}
+              </button>
 
-          <button
-            type="button"
-            disabled={isSaving || !reconciliation.isValid}
-            onClick={onFinalize}
-            className="inline-flex items-center px-4 py-2 rounded-lg text-xs font-bold bg-amber-600 text-white hover:bg-amber-700 shadow-xs transition-colors disabled:opacity-50"
-          >
-            <Check className="w-3.5 h-3.5 mr-1.5" />
-            Finalize Statement
-          </button>
+              <button
+                type="button"
+                disabled={isSaving || !reconciliation.isValid || isConflict}
+                onClick={onFinalize}
+                className="inline-flex items-center px-4 py-2 rounded-lg text-xs font-bold bg-amber-600 text-white hover:bg-amber-700 shadow-xs transition-colors disabled:opacity-50"
+              >
+                <Check className="w-3.5 h-3.5 mr-1.5" />
+                Finalize Statement
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>

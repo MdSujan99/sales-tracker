@@ -117,6 +117,8 @@ export async function getExpenseCategories(): Promise<ExpenseCategory[]> {
         .select('*')
         .order('display_order', { ascending: true });
       if (!error && data && data.length > 0) {
+        // Cache locally for offline access
+        localStorage.setItem(LOCAL_STORAGE_CATEGORIES_KEY, JSON.stringify(data));
         return data as ExpenseCategory[];
       }
     } catch (err) {
@@ -133,6 +135,78 @@ export async function getExpenseCategories(): Promise<ExpenseCategory[]> {
     }
   }
   return DEFAULT_CATEGORIES;
+}
+
+/**
+ * Creates and persists a new custom expense category.
+ */
+export async function saveExpenseCategory(name: string): Promise<ExpenseCategory> {
+  const trimmedName = name.trim();
+  if (!trimmedName) {
+    throw new Error('Category name cannot be empty');
+  }
+
+  // Get current categories
+  const currentCategories = await getExpenseCategories();
+  const existing = currentCategories.find(
+    c => c.name.toLowerCase() === trimmedName.toLowerCase()
+  );
+  if (existing) {
+    return existing;
+  }
+
+  const maxOrder = currentCategories.reduce((max, c) => Math.max(max, c.display_order || 0), 0);
+  const newCat: ExpenseCategory = {
+    id: generateUuid(),
+    name: trimmedName,
+    display_order: maxOrder + 1,
+    is_active: true,
+    is_predefined: false,
+  };
+
+  const updatedCategories = [...currentCategories, newCat];
+  localStorage.setItem(LOCAL_STORAGE_CATEGORIES_KEY, JSON.stringify(updatedCategories));
+
+  // If Supabase is connected, persist to remote DB
+  if (isSupabaseConfigured && supabase) {
+    try {
+      await supabase.from('expense_categories').insert({
+        id: newCat.id,
+        restaurant_id: DEFAULT_RESTAURANT_ID,
+        name: newCat.name,
+        display_order: newCat.display_order,
+        is_active: true,
+      });
+    } catch (err) {
+      console.warn('Could not persist category to Supabase:', err);
+    }
+  }
+
+  return newCat;
+}
+
+/**
+ * Deletes a custom expense category (predefined categories cannot be deleted).
+ */
+export async function deleteExpenseCategory(id: string): Promise<boolean> {
+  const currentCategories = await getExpenseCategories();
+  const cat = currentCategories.find(c => c.id === id);
+  if (!cat || cat.is_predefined) {
+    return false;
+  }
+
+  const filtered = currentCategories.filter(c => c.id !== id);
+  localStorage.setItem(LOCAL_STORAGE_CATEGORIES_KEY, JSON.stringify(filtered));
+
+  if (isSupabaseConfigured && supabase) {
+    try {
+      await supabase.from('expense_categories').delete().eq('id', id);
+    } catch (err) {
+      console.warn('Could not delete category from Supabase:', err);
+    }
+  }
+
+  return true;
 }
 
 /**
@@ -194,6 +268,23 @@ export async function saveStatementToDb(statement: DailyStatement): Promise<{ su
     })),
   };
 
+  // Validate for duplicate statement on the same business date (different ID)
+  try {
+    const existingStr = localStorage.getItem(LOCAL_STORAGE_STATEMENTS_KEY);
+    const existingList: DailyStatement[] = existingStr ? JSON.parse(existingStr) : [];
+    const conflict = existingList.find(
+      s => s.business_date === normalizedStatement.business_date && s.id !== normalizedStatement.id
+    );
+    if (conflict) {
+      return {
+        success: false,
+        error: `A statement for ${normalizedStatement.business_date} already exists (${conflict.statement_number || 'ST'}). Only one statement per business date is allowed.`,
+      };
+    }
+  } catch {
+    // Ignore localStorage parse errors
+  }
+
   // Always keep localStorage updated as immediate backup
   try {
     const existingStr = localStorage.getItem(LOCAL_STORAGE_STATEMENTS_KEY);
@@ -212,6 +303,22 @@ export async function saveStatementToDb(statement: DailyStatement): Promise<{ su
   // If Supabase is connected, persist remotely
   if (isSupabaseConfigured && supabase) {
     try {
+      // Check for remote date collisions with a different statement ID
+      const { data: existingRows } = await supabase
+        .from('daily_statements')
+        .select('id, statement_number, status')
+        .eq('restaurant_id', validRestaurantId)
+        .eq('business_date', normalizedStatement.business_date);
+
+      if (existingRows && existingRows.length > 0) {
+        const conflictingRemote = existingRows.find(r => r.id !== validStatementId);
+        if (conflictingRemote) {
+          return {
+            success: false,
+            error: `A ${conflictingRemote.status.toLowerCase()} statement (${conflictingRemote.statement_number}) already exists in the database for ${normalizedStatement.business_date}. Duplicate daily statements are not allowed.`,
+          };
+        }
+      }
       const {
         cash_memos,
         expense_entries,

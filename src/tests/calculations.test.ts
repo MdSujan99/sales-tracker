@@ -4,6 +4,8 @@ import {
   paiseToRupees,
   formatPaiseToINR,
   calculateTotalSales,
+  calculateCashSales,
+  calculateCashInHand,
   calculateTotalExpenses,
   calculateTotalCashMemos,
   calculateNetDifference,
@@ -41,7 +43,7 @@ describe('Integer Paise Conversions', () => {
 });
 
 describe('Statement Calculations', () => {
-  it('calculates total sales across channels', () => {
+  it('calculates total sales across channels when total_sales_paise is not set', () => {
     const total = calculateTotalSales({
       cash_sales_paise: 500000,     // ₹5,000
       upi_sales_paise: 800000,      // ₹8,000
@@ -50,6 +52,45 @@ describe('Statement Calculations', () => {
       other_sales_paise: 50000,     // ₹500
     });
     expect(total).toBe(1900000); // ₹19,000
+  });
+
+  it('uses explicitly provided total_sales_paise when entered directly', () => {
+    const total = calculateTotalSales({
+      total_sales_paise: 2500000,   // ₹25,000 entered
+      cash_sales_paise: 1000000,
+      upi_sales_paise: 800000,
+      card_sales_paise: 400000,
+      delivery_sales_paise: 300000,
+      other_sales_paise: 0,
+    });
+    expect(total).toBe(2500000);
+  });
+
+  it('calculates derived cash sales (Total - NonCash channels)', () => {
+    const totalSalesPaise = 2000000; // ₹20,000
+    const nonCash = {
+      delivery_sales_paise: 500000, // ₹5,000
+      card_sales_paise: 300000,     // ₹3,000
+      upi_sales_paise: 400000,      // ₹4,000
+      other_sales_paise: 100000,    // ₹1,000
+    };
+    const cashSales = calculateCashSales(totalSalesPaise, nonCash);
+    // 20000 - (5000 + 3000 + 4000 + 1000) = 7000 => 700000 paise
+    expect(cashSales).toBe(700000);
+  });
+
+  it('calculates cash in hand (Cash Sales - Expenses)', () => {
+    const cashSalesPaise = 700000; // ₹7,000
+    const totalExpensesPaise = 250000; // ₹2,500
+    const cashInHand = calculateCashInHand(cashSalesPaise, totalExpensesPaise);
+    expect(cashInHand).toBe(450000); // ₹4,500
+  });
+
+  it('handles negative cash in hand when expenses exceed cash sales', () => {
+    const cashSalesPaise = 200000; // ₹2,000
+    const totalExpensesPaise = 350000; // ₹3,500
+    const cashInHand = calculateCashInHand(cashSalesPaise, totalExpensesPaise);
+    expect(cashInHand).toBe(-150000); // -₹1,500
   });
 
   it('calculates total expenses', () => {
@@ -96,6 +137,29 @@ describe('Reconciliation & Sanity Checks', () => {
     const result = reconcileStatement(statement);
     expect(result.warnings.length).toBeGreaterThan(0);
     expect(result.salesDiscrepancyPaise).toBe(200000); // ₹2,000 difference
+  });
+
+  it('flags error when non-cash channels exceed total sales causing negative cash sales', () => {
+    const statement: Partial<DailyStatement> = {
+      business_date: '2026-11-02',
+      total_sales_paise: 1000000, // ₹10,000
+      cash_sales_paise: -200000,  // -₹2,000 (Non-cash was ₹12,000)
+    };
+    const result = reconcileStatement(statement);
+    expect(result.isValid).toBe(false);
+    expect(result.errors.some(e => e.includes('Derived Cash Sales cannot be negative'))).toBe(true);
+  });
+
+  it('flags warning when expenses exceed cash sales', () => {
+    const statement: Partial<DailyStatement> = {
+      business_date: '2026-11-02',
+      cash_sales_paise: 200000, // ₹2,000
+      expense_entries: [
+        { id: '1', category_name: 'Vegetables', description: '', amount_paise: 300000 }, // ₹3,000
+      ],
+    };
+    const result = reconcileStatement(statement);
+    expect(result.warnings.some(w => w.includes('Cash in hand is negative'))).toBe(true);
   });
 
   it('fails validation if business date is missing', () => {

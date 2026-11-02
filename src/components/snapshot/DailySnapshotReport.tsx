@@ -106,28 +106,30 @@ export const DailySnapshotReport: React.FC<DailySnapshotReportProps> = ({
           </h2>
           <table className="w-full text-xs border border-t-0 border-slate-300 divide-y divide-slate-200">
             <tbody>
-              <tr>
-                <td className="p-2 font-medium text-slate-700">Cash Sales</td>
-                <td className="p-2 text-right font-bold text-slate-900">
-                  {formatPaiseToINR(statement.cash_sales_paise)}
+              <tr className="bg-amber-50/70 font-black border-b border-amber-200 print:bg-slate-100">
+                <td className="p-2 text-amber-950 uppercase font-black">
+                  Total Daily Sales (Register / POS Grand Total)
                 </td>
-              </tr>
-              <tr className="bg-slate-50/50">
-                <td className="p-2 font-medium text-slate-700">UPI / QR Payments</td>
-                <td className="p-2 text-right font-bold text-slate-900">
-                  {formatPaiseToINR(statement.upi_sales_paise)}
-                </td>
-              </tr>
-              <tr>
-                <td className="p-2 font-medium text-slate-700">Card / POS</td>
-                <td className="p-2 text-right font-bold text-slate-900">
-                  {formatPaiseToINR(statement.card_sales_paise)}
+                <td className="p-2 text-right text-amber-950 text-sm font-black">
+                  {formatPaiseToINR(statement.total_sales_paise)}
                 </td>
               </tr>
               <tr className="bg-slate-50/50">
                 <td className="p-2 font-medium text-slate-700">Online Delivery (Zomato / Swiggy)</td>
                 <td className="p-2 text-right font-bold text-slate-900">
                   {formatPaiseToINR(statement.delivery_sales_paise)}
+                </td>
+              </tr>
+              <tr>
+                <td className="p-2 font-medium text-slate-700">Card / POS Settlements</td>
+                <td className="p-2 text-right font-bold text-slate-900">
+                  {formatPaiseToINR(statement.card_sales_paise)}
+                </td>
+              </tr>
+              <tr className="bg-slate-50/50">
+                <td className="p-2 font-medium text-slate-700">UPI / QR Payments (GPay / PhonePe)</td>
+                <td className="p-2 text-right font-bold text-slate-900">
+                  {formatPaiseToINR(statement.upi_sales_paise)}
                 </td>
               </tr>
               {statement.other_sales_paise > 0 && (
@@ -138,10 +140,12 @@ export const DailySnapshotReport: React.FC<DailySnapshotReportProps> = ({
                   </td>
                 </tr>
               )}
-              <tr className="bg-emerald-50 font-black border-t-2 border-slate-300 print:bg-slate-100">
-                <td className="p-2 text-emerald-950 uppercase">Total Sales</td>
-                <td className="p-2 text-right text-emerald-950 text-sm">
-                  {formatPaiseToINR(statement.total_sales_paise)}
+              <tr className="bg-emerald-50 font-black border-t-2 border-slate-300 print:bg-slate-200">
+                <td className="p-2 text-emerald-950 uppercase">
+                  Derived Cash Sales <span className="text-2xs font-normal text-emerald-800">(Total Sales − Non-Cash Channels)</span>
+                </td>
+                <td className="p-2 text-right text-emerald-950 text-sm font-black">
+                  {formatPaiseToINR(statement.cash_sales_paise)}
                 </td>
               </tr>
             </tbody>
@@ -231,36 +235,53 @@ export const DailySnapshotReport: React.FC<DailySnapshotReportProps> = ({
         </div>
 
         {/* Section 4: Summary Reconciliation Balancing */}
-        <div className="mb-6 bg-slate-50 border border-slate-300 rounded p-4 print:bg-white print:border-2 print:border-slate-800">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-            <div>
-              <span className="text-2xs font-semibold uppercase text-slate-500 block">Total Sales</span>
-              <span className="text-base font-black text-slate-900 block mt-0.5">
-                {formatPaiseToINR(statement.total_sales_paise)}
-              </span>
+        {(() => {
+          const cashInHandPaise =
+            statement.cash_in_hand_paise ??
+            (statement.cash_sales_paise - statement.total_expenses_paise);
+
+          return (
+            <div className="mb-6 bg-slate-50 border border-slate-300 rounded p-4 print:bg-white print:border-2 print:border-slate-800">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 text-center">
+                <div>
+                  <span className="text-2xs font-semibold uppercase text-slate-500 block">Total Sales</span>
+                  <span className="text-sm sm:text-base font-black text-slate-900 block mt-0.5">
+                    {formatPaiseToINR(statement.total_sales_paise)}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-2xs font-semibold uppercase text-slate-500 block">Cash Sales</span>
+                  <span className="text-sm sm:text-base font-black text-emerald-700 block mt-0.5">
+                    {formatPaiseToINR(statement.cash_sales_paise)}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-2xs font-semibold uppercase text-slate-500 block">Total Expenses</span>
+                  <span className="text-sm sm:text-base font-black text-rose-700 block mt-0.5">
+                    {formatPaiseToINR(statement.total_expenses_paise)}
+                  </span>
+                </div>
+                <div className="bg-emerald-100/70 border border-emerald-300 rounded p-1.5 print:bg-slate-100 print:border-slate-400">
+                  <span className="text-2xs font-black uppercase text-emerald-950 block">
+                    Cash in Hand
+                  </span>
+                  <span className="text-sm sm:text-base font-black text-emerald-900 block mt-0.5">
+                    {formatPaiseToINR(cashInHandPaise)}
+                  </span>
+                  <span className="text-3xs text-emerald-800 font-semibold block">
+                    Cash Sales − Exp
+                  </span>
+                </div>
+                <div>
+                  <span className="text-2xs font-semibold uppercase text-slate-500 block">Net Difference</span>
+                  <span className="text-sm sm:text-base font-black text-slate-900 block mt-0.5">
+                    {formatPaiseToINR(statement.net_difference_paise)}
+                  </span>
+                </div>
+              </div>
             </div>
-            <div>
-              <span className="text-2xs font-semibold uppercase text-slate-500 block">Total Expenses</span>
-              <span className="text-base font-black text-slate-900 block mt-0.5">
-                {formatPaiseToINR(statement.total_expenses_paise)}
-              </span>
-            </div>
-            <div>
-              <span className="text-2xs font-semibold uppercase text-slate-500 block">
-                Net Difference
-              </span>
-              <span className="text-base font-black text-slate-900 block mt-0.5">
-                {formatPaiseToINR(statement.net_difference_paise)}
-              </span>
-            </div>
-            <div>
-              <span className="text-2xs font-semibold uppercase text-slate-500 block">Cash Memos</span>
-              <span className="text-base font-black text-slate-900 block mt-0.5">
-                {formatPaiseToINR(statement.total_cash_memos_paise)}
-              </span>
-            </div>
-          </div>
-        </div>
+          );
+        })()}
 
         {/* Notes */}
         {statement.notes && (
@@ -271,14 +292,26 @@ export const DailySnapshotReport: React.FC<DailySnapshotReportProps> = ({
         )}
 
         {/* Section 5: Signatures / Handover Block */}
-        <div className="pt-8 border-t border-slate-300 grid grid-cols-2 gap-8 text-xs">
-          <div className="border-t border-dashed border-slate-400 pt-2 text-center">
-            <span className="block font-bold text-slate-800">Prepared by Accountant</span>
-            <span className="block text-2xs text-slate-400 mt-0.5">Signature & Stamp</span>
+        <div className="pt-6 border-t border-slate-300">
+          <div className="mb-6 p-2.5 bg-slate-100 border border-slate-300 rounded text-center text-xs print:bg-white print:border-slate-400">
+            <span className="font-semibold text-slate-700">Closing Cash in Hand for Drawer / Handover: </span>
+            <span className="font-black text-slate-950 text-sm">
+              {formatPaiseToINR(
+                statement.cash_in_hand_paise ??
+                  (statement.cash_sales_paise - statement.total_expenses_paise)
+              )}
+            </span>
           </div>
-          <div className="border-t border-dashed border-slate-400 pt-2 text-center">
-            <span className="block font-bold text-slate-800">Verified by Owner / Manager</span>
-            <span className="block text-2xs text-slate-400 mt-0.5">Signature & Stamp</span>
+
+          <div className="grid grid-cols-2 gap-8 text-xs">
+            <div className="border-t border-dashed border-slate-400 pt-2 text-center">
+              <span className="block font-bold text-slate-800">Prepared by Accountant</span>
+              <span className="block text-2xs text-slate-400 mt-0.5">Signature & Stamp</span>
+            </div>
+            <div className="border-t border-dashed border-slate-400 pt-2 text-center">
+              <span className="block font-bold text-slate-800">Verified by Owner / Manager</span>
+              <span className="block text-2xs text-slate-400 mt-0.5">Signature & Stamp</span>
+            </div>
           </div>
         </div>
       </div>
