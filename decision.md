@@ -7,6 +7,18 @@ Whenever any change is made to existing code or schema, add an entry with the **
 
 ## Decision Log
 
+### 2026-11-03: Numeric Date Format in Snapshot Report
+- **Reason**: The user requested the statement date to be displayed strictly in numbers instead of spelled-out words/weekdays.
+- **Change**: Updated [`DailySnapshotReport.tsx`](file:///src/components/snapshot/DailySnapshotReport.tsx) to format dates numerically as `DD/MM/YYYY`.
+
+### 2026-11-03: Narrow Snapshot Width & Constrain PDF Print Margins
+- **Reason**: The full A4-width table layout was too stretched horizontally for a minimal monospace receipt/statement.
+- **Change**: Constrained screen width to `max-w-2xl` and print view to `max-w-xl` with centered auto-margins and `max-width: 600px` in [`DailySnapshotReport.tsx`](file:///src/components/snapshot/DailySnapshotReport.tsx) and [`index.css`](file:///src/index.css).
+
+### 2026-11-03: Minimal Black & White Monospace PDF Print Layout with Clean Pagination
+- **Reason**: The previous snapshot layout used colored backgrounds, rounded borders, and loose margins that broke unreliably across pages when printed or saved as PDF.
+- **Change**: Redesigned [`DailySnapshotReport.tsx`](file:///src/components/snapshot/DailySnapshotReport.tsx) into a compact, purely text-based, black & white monospace report; updated [`index.css`](file:///src/index.css) `@media print` rules with explicit `break-inside: avoid` / `page-break-inside: avoid` per section and table row to prevent awkward splits.
+
 ### 2026-11-03: Remove Paper Total (Optional) Reconciliation Inputs
 - **Reason**: The manual "Paper Total (optional)" input fields in both sales and expenses sections added unnecessary visual complexity and paper-book comparison fields to the daily entry workflow.
 - **Change**: Completely removed the "Paper Total (optional)" input rows from `SalesChannelsSection.tsx` and `ExpensesSection.tsx`, and cleaned up the corresponding props in `DailyEntryForm.tsx`.
