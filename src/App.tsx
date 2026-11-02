@@ -6,42 +6,9 @@ import { DailyEntryForm } from './components/entry/DailyEntryForm';
 import { DailySnapshotReport } from './components/snapshot/DailySnapshotReport';
 import { StatementHistory } from './components/history/StatementHistory';
 import { DashboardAnalytics } from './components/dashboard/DashboardAnalytics';
-import { getStatements, getExpenseCategories, deleteStatementFromDb, saveStatementToDb, generateUuid } from './lib/supabase';
+import { getStatements, getExpenseCategories, deleteStatementFromDb, generateUuid } from './lib/supabase';
 import type { DailyStatement, ExpenseCategory } from './types/statement';
-
-// Initial sample statement to seed if empty
-const SAMPLE_INITIAL_STATEMENTS: DailyStatement[] = [
-  {
-    id: 'stmt-sample-yesterday',
-    restaurant_id: '00000000-0000-0000-0000-000000000001',
-    business_date: new Date(Date.now() - 86400000).toISOString().split('T')[0],
-    statement_number: `ST-${new Date(Date.now() - 86400000).toISOString().slice(2, 10).replace(/-/g, '')}-01`,
-    status: 'FINALIZED',
-    cash_sales_paise: 1850000,     // ₹18,500
-    upi_sales_paise: 2420000,      // ₹24,200
-    card_sales_paise: 650000,      // ₹6,500
-    delivery_sales_paise: 890000,  // ₹8,900
-    other_sales_paise: 0,
-    total_sales_paise: 5810000,    // ₹58,100
-    cash_memos: [
-      { id: 'm-1', from_number: '101', to_number: '148', source: 'Dine-in Floor', amount_paise: 2240000 },
-      { id: 'm-2', from_number: '501', to_number: '535', source: 'Takeaway Counter', amount_paise: 1120000 },
-    ],
-    total_cash_memos_paise: 3360000,
-    expense_entries: [
-      { id: 'e-1', category_name: 'Vegetables / Mandi', description: 'Early morning vegetable market', amount_paise: 420000 },
-      { id: 'e-2', category_name: 'Dairy / Milk / Paneer', description: 'Amul Milk & Paneer crate', amount_paise: 280000 },
-      { id: 'e-3', category_name: 'Gas / Commercial Cylinders', description: '19kg Commercial Bharat Gas', amount_paise: 185000 },
-      { id: 'e-4', category_name: 'Daily Wages / Labour', description: 'Dishwasher & helper wage', amount_paise: 90000 },
-      { id: 'e-5', category_name: 'Staff Tea & Refreshment', description: 'Staff evening snacks', amount_paise: 35000 },
-    ],
-    total_expenses_paise: 1010000, // ₹10,100
-    net_difference_paise: 4800000, // ₹48,000
-    notes: 'Dinner rush was heavy. All cash counts verified with manager.',
-    created_at: new Date(Date.now() - 86400000).toISOString(),
-    updated_at: new Date(Date.now() - 86400000).toISOString(),
-  },
-];
+import { FileText, PlusCircle } from 'lucide-react';
 
 const MainApp: React.FC = () => {
   const [activeTab, setActiveTab] = useState<AppTab>('ENTRY');
@@ -52,17 +19,35 @@ const MainApp: React.FC = () => {
 
   // Load statements & categories on mount
   useEffect(() => {
+    // Purge any legacy sample/mock data from localStorage
+    try {
+      const local = localStorage.getItem('restaurant_daily_statements_v1');
+      if (local) {
+        const parsed = JSON.parse(local);
+        const filtered = parsed.filter((s: { id?: string }) => s.id !== 'stmt-sample-yesterday');
+        if (filtered.length !== parsed.length) {
+          localStorage.setItem('restaurant_daily_statements_v1', JSON.stringify(filtered));
+        }
+      }
+      const draft = localStorage.getItem('restaurant_daily_statement_active_draft');
+      if (draft) {
+        const parsedDraft = JSON.parse(draft);
+        if (parsedDraft.id === 'stmt-sample-yesterday') {
+          localStorage.removeItem('restaurant_daily_statement_active_draft');
+        }
+      }
+    } catch {
+      // Ignore
+    }
+
     async function loadData() {
       const cats = await getExpenseCategories();
       setCategories(cats);
 
-      let stmts = await getStatements();
-      if (stmts.length === 0) {
-        // Seed initial sample statement
-        await saveStatementToDb(SAMPLE_INITIAL_STATEMENTS[0]);
-        stmts = SAMPLE_INITIAL_STATEMENTS;
-      }
-      setStatements(stmts);
+      const stmts = await getStatements();
+      // Filter out any sample data if previously persisted
+      const cleanStmts = stmts.filter(s => s.id !== 'stmt-sample-yesterday');
+      setStatements(cleanStmts);
     }
     loadData();
   }, []);
@@ -131,6 +116,8 @@ const MainApp: React.FC = () => {
     if (snapshotStatement?.id === id) setSnapshotStatement(null);
   };
 
+  const statementToSnapshot = snapshotStatement || activeStatement || statements[0] || null;
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
       <Navbar />
@@ -155,14 +142,32 @@ const MainApp: React.FC = () => {
         )}
 
         {activeTab === 'SNAPSHOT' && (
-          <DailySnapshotReport
-            statement={snapshotStatement || activeStatement || statements[0] || SAMPLE_INITIAL_STATEMENTS[0]}
-            onEdit={() => {
-              if (snapshotStatement) setActiveStatement(snapshotStatement);
-              setActiveTab('ENTRY');
-            }}
-            onBack={() => setActiveTab('ENTRY')}
-          />
+          statementToSnapshot ? (
+            <DailySnapshotReport
+              statement={statementToSnapshot}
+              onEdit={() => {
+                setActiveStatement(statementToSnapshot);
+                setActiveTab('ENTRY');
+              }}
+              onBack={() => setActiveTab('ENTRY')}
+            />
+          ) : (
+            <div className="max-w-md mx-auto my-12 bg-white rounded-xl border border-slate-200 p-8 text-center shadow-xs">
+              <FileText className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+              <h2 className="text-base font-bold text-slate-800 m-0">No Statement Available</h2>
+              <p className="text-xs text-slate-500 mt-1 mb-5">
+                Complete and save your first daily cash statement in the Daily Entry tab to view and print your A4 snapshot.
+              </p>
+              <button
+                type="button"
+                onClick={() => setActiveTab('ENTRY')}
+                className="inline-flex items-center px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold transition-colors shadow-xs"
+              >
+                <PlusCircle className="w-4 h-4 mr-1.5" />
+                Go to Daily Entry
+              </button>
+            </div>
+          )
         )}
 
         {activeTab === 'HISTORY' && (

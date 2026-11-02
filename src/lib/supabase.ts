@@ -1,13 +1,48 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import type { DailyStatement, ExpenseCategory } from '../types/statement';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+/**
+ * Sanitizes and normalizes Supabase Project URL to prevent "Invalid path specified in request URL".
+ */
+export function sanitizeSupabaseUrl(url: string | undefined): string {
+  if (!url) return '';
+  let cleaned = url.trim();
+  // Strip outer quotes if copied with quotes in Vercel
+  cleaned = cleaned.replace(/^['"]+|['"]+$/g, '');
+  // Strip trailing slashes
+  cleaned = cleaned.replace(/\/+$/, '');
+
+  // If user accidentally copied the browser dashboard URL:
+  // e.g. https://supabase.com/dashboard/project/abcdefghijk
+  const dashMatch = cleaned.match(/supabase\.com\/dashboard\/project\/([a-z0-9_-]+)/i);
+  if (dashMatch) {
+    return `https://${dashMatch[1]}.supabase.co`;
+  }
+
+  // If user appended /rest/v1 or /rest or /api
+  cleaned = cleaned.replace(/\/(rest(\/v1)?|api(\/v1)?)$/i, '');
+  // Strip trailing slashes again
+  cleaned = cleaned.replace(/\/+$/, '');
+
+  return cleaned;
+}
+
+export function sanitizeAnonKey(key: string | undefined): string {
+  if (!key) return '';
+  return key.trim().replace(/^['"]+|['"]+$/g, '');
+}
+
+const rawSupabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const rawSupabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+export const supabaseUrl = sanitizeSupabaseUrl(rawSupabaseUrl);
+export const supabaseAnonKey = sanitizeAnonKey(rawSupabaseAnonKey);
 
 export const isSupabaseConfigured = Boolean(
   supabaseUrl &&
   supabaseAnonKey &&
-  !supabaseUrl.includes('your-project.supabase.co')
+  !supabaseUrl.includes('your-project.supabase.co') &&
+  supabaseUrl.startsWith('https://')
 );
 
 export const supabase: SupabaseClient | null = isSupabaseConfigured
