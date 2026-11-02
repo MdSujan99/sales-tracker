@@ -7,6 +7,14 @@ Whenever any change is made to existing code or schema, add an entry with the **
 
 ## Decision Log
 
+### 2026-11-03: Floating Bottom Navigation Dock
+- **Reason**: The user requested the bottom navigation bar to be floating for an app-like feel.
+- **Change**: Updated [`TabNav.tsx`](file:///src/components/layout/TabNav.tsx) into a floating pill dock (`fixed bottom-4 inset-x-0`, `max-w-lg`, `rounded-2xl`, `backdrop-blur-md`, `shadow-xl`) centered above the screen edge with smooth active tab highlights.
+
+### 2026-11-03: Move Tab Navigation to Fixed Bottom Bar
+- **Reason**: Mobile-first ergonomic usability allows quicker one-handed switching between Entry, Print Snapshot, History, and Dashboard.
+- **Change**: Updated [`TabNav.tsx`](file:///src/components/layout/TabNav.tsx) to be fixed to the bottom (`fixed bottom-0 left-0 right-0 z-30`) with backdrop blur and responsive column-on-mobile layout, and increased [`App.tsx`](file:///src/App.tsx) main container bottom padding to `pb-24` to prevent content overlap.
+
 ### 2026-11-03: Numeric Date Format in Snapshot Report
 - **Reason**: The user requested the statement date to be displayed strictly in numbers instead of spelled-out words/weekdays.
 - **Change**: Updated [`DailySnapshotReport.tsx`](file:///src/components/snapshot/DailySnapshotReport.tsx) to format dates numerically as `DD/MM/YYYY`.

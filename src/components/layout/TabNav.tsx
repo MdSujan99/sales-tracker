@@ -23,7 +23,7 @@ export const TabNav: React.FC<TabNavProps> = ({
     },
     {
       id: 'SNAPSHOT' as AppTab,
-      label: 'Print Snapshot',
+      label: 'Snapshot',
       icon: FileText,
     },
     {
@@ -39,9 +39,9 @@ export const TabNav: React.FC<TabNavProps> = ({
   ];
 
   return (
-    <nav className="bg-white border-b border-slate-200 no-print sticky top-16 z-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex space-x-2 sm:space-x-8 overflow-x-auto py-2 scrollbar-none">
+    <div className="fixed bottom-4 sm:bottom-6 inset-x-0 z-30 flex justify-center px-4 pointer-events-none no-print">
+      <nav className="pointer-events-auto bg-white/90 backdrop-blur-md border border-slate-200/80 shadow-xl shadow-slate-900/10 rounded-2xl p-1.5 max-w-lg w-full transition-all">
+        <div className="grid grid-cols-4 gap-1">
           {tabs.map(tab => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -50,16 +50,22 @@ export const TabNav: React.FC<TabNavProps> = ({
                 key={tab.id}
                 type="button"
                 onClick={() => onTabChange(tab.id)}
-                className={`flex items-center px-3 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition-colors ${
+                className={`relative flex flex-col sm:flex-row items-center justify-center py-2 px-1 sm:px-3 rounded-xl text-xs font-semibold transition-all duration-200 ${
                   isActive
-                    ? 'bg-amber-50 text-amber-900 border border-amber-200'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                    ? 'bg-amber-600 text-white shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
                 }`}
               >
-                <Icon className={`w-4 h-4 mr-2 ${isActive ? 'text-amber-600' : 'text-slate-400'}`} />
-                {tab.label}
+                <Icon className={`w-4 h-4 sm:mr-1.5 transition-colors ${isActive ? 'text-white' : 'text-slate-500'}`} />
+                <span className="text-2xs sm:text-xs mt-0.5 sm:mt-0 leading-tight truncate">
+                  {tab.label}
+                </span>
                 {tab.badge && (
-                  <span className="ml-2 px-1.5 py-0.5 text-2xs font-bold rounded-full bg-amber-500 text-white">
+                  <span
+                    className={`ml-1 px-1.5 py-0.2 rounded-full text-3xs uppercase font-extrabold hidden sm:inline-block ${
+                      isActive ? 'bg-amber-800 text-amber-100' : 'bg-amber-100 text-amber-900'
+                    }`}
+                  >
                     {tab.badge}
                   </span>
                 )}
@@ -67,7 +73,7 @@ export const TabNav: React.FC<TabNavProps> = ({
             );
           })}
         </div>
-      </div>
-    </nav>
+      </nav>
+    </div>
   );
 };
