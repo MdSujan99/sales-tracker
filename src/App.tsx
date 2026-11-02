@@ -6,7 +6,7 @@ import { DailyEntryForm } from './components/entry/DailyEntryForm';
 import { DailySnapshotReport } from './components/snapshot/DailySnapshotReport';
 import { StatementHistory } from './components/history/StatementHistory';
 import { DashboardAnalytics } from './components/dashboard/DashboardAnalytics';
-import { getStatements, getExpenseCategories, deleteStatementFromDb, saveStatementToDb } from './lib/supabase';
+import { getStatements, getExpenseCategories, deleteStatementFromDb, saveStatementToDb, generateUuid } from './lib/supabase';
 import type { DailyStatement, ExpenseCategory } from './types/statement';
 
 // Initial sample statement to seed if empty
@@ -93,7 +93,7 @@ const MainApp: React.FC = () => {
     const today = new Date().toISOString().split('T')[0];
     const duplicated: DailyStatement = {
       ...sourceStmt,
-      id: `stmt-${Date.now()}`,
+      id: generateUuid(),
       business_date: today,
       statement_number: `ST-${today.slice(2).replace(/-/g, '')}-01`,
       status: 'DRAFT',
@@ -105,12 +105,12 @@ const MainApp: React.FC = () => {
       other_sales_paise: 0,
       total_sales_paise: 0,
       cash_memos: [
-        { id: `memo-${Date.now()}`, from_number: '', to_number: '', source: 'Counter', amount_paise: 0 },
+        { id: generateUuid(), from_number: '', to_number: '', source: 'Counter', amount_paise: 0 },
       ],
       total_cash_memos_paise: 0,
       expense_entries: (sourceStmt.expense_entries || []).map(e => ({
         ...e,
-        id: `exp-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+        id: generateUuid(),
         amount_paise: 0, // Cleared amount ready for today's entry
       })),
       total_expenses_paise: 0,

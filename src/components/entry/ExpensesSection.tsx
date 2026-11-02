@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { ExpenseItem, ExpenseCategory } from '../../types/statement';
 import { paiseToRupees, rupeesToPaise, formatPaiseToINR, calculateTotalExpenses } from '../../lib/calculations';
+import { generateUuid } from '../../lib/supabase';
 import { ShoppingBag, Plus, Trash2, Tag, AlertCircle } from 'lucide-react';
 
 interface ExpensesSectionProps {
@@ -30,7 +31,7 @@ export const ExpensesSection: React.FC<ExpensesSectionProps> = ({
 
     const matchedCat = categories.find(c => c.name === selectedCategory);
     const newEntry: ExpenseItem = {
-      id: `exp-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      id: generateUuid(),
       category_id: matchedCat?.id,
       category_name: selectedCategory,
       description: newDescription.trim() || selectedCategory,
@@ -44,7 +45,7 @@ export const ExpensesSection: React.FC<ExpensesSectionProps> = ({
 
   const handleQuickAddCategory = (cat: ExpenseCategory) => {
     const newEntry: ExpenseItem = {
-      id: `exp-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      id: generateUuid(),
       category_id: cat.id,
       category_name: cat.name,
       description: '',

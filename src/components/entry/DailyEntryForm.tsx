@@ -17,7 +17,7 @@ import {
   calculateNetDifference,
   reconcileStatement,
 } from '../../lib/calculations';
-import { saveStatementToDb } from '../../lib/supabase';
+import { saveStatementToDb, generateUuid } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { Calendar, Hash, CheckCircle } from 'lucide-react';
 
@@ -42,7 +42,7 @@ export const DailyEntryForm: React.FC<DailyEntryFormProps> = ({
   const getTodayDate = () => new Date().toISOString().split('T')[0];
 
   const createBlankStatement = (): DailyStatement => ({
-    id: `stmt-${Date.now()}`,
+    id: generateUuid(),
     restaurant_id: restaurant.id,
     business_date: getTodayDate(),
     statement_number: `ST-${new Date().toISOString().slice(2, 10).replace(/-/g, '')}-01`,
@@ -54,7 +54,7 @@ export const DailyEntryForm: React.FC<DailyEntryFormProps> = ({
     other_sales_paise: 0,
     total_sales_paise: 0,
     cash_memos: [
-      { id: 'memo-1', from_number: '', to_number: '', source: 'Counter / Dine-in', amount_paise: 0 },
+      { id: generateUuid(), from_number: '', to_number: '', source: 'Counter / Dine-in', amount_paise: 0 },
     ],
     total_cash_memos_paise: 0,
     expense_entries: [],

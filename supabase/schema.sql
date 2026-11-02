@@ -105,28 +105,34 @@ ALTER TABLE public.daily_statements ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.cash_memos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.expense_entries ENABLE ROW LEVEL SECURITY;
 
--- Allow authenticated users full read/write access to restaurant records
-CREATE POLICY "Allow authenticated read on restaurants" 
-    ON public.restaurants FOR SELECT TO authenticated USING (true);
+-- Drop legacy restrictive policies if they exist
+DROP POLICY IF EXISTS "Allow authenticated read on restaurants" ON public.restaurants;
+DROP POLICY IF EXISTS "Allow authenticated full access on expense_categories" ON public.expense_categories;
+DROP POLICY IF EXISTS "Allow authenticated full access on daily_statements" ON public.daily_statements;
+DROP POLICY IF EXISTS "Allow authenticated full access on cash_memos" ON public.cash_memos;
+DROP POLICY IF EXISTS "Allow authenticated full access on expense_entries" ON public.expense_entries;
 
-CREATE POLICY "Allow authenticated full access on expense_categories" 
-    ON public.expense_categories FOR ALL TO authenticated USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS "Allow public full access on restaurants" ON public.restaurants;
+DROP POLICY IF EXISTS "Allow public full access on expense_categories" ON public.expense_categories;
+DROP POLICY IF EXISTS "Allow public full access on daily_statements" ON public.daily_statements;
+DROP POLICY IF EXISTS "Allow public full access on cash_memos" ON public.cash_memos;
+DROP POLICY IF EXISTS "Allow public full access on expense_entries" ON public.expense_entries;
 
-CREATE POLICY "Allow authenticated full access on daily_statements" 
-    ON public.daily_statements FOR ALL TO authenticated USING (true) WITH CHECK (true);
+-- Allow anon and authenticated full read/write access to restaurant records
+CREATE POLICY "Allow public full access on restaurants" 
+    ON public.restaurants FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
 
-CREATE POLICY "Allow authenticated full access on cash_memos" 
-    ON public.cash_memos FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Allow public full access on expense_categories" 
+    ON public.expense_categories FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
 
-CREATE POLICY "Allow authenticated full access on expense_entries" 
-    ON public.expense_entries FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Allow public full access on daily_statements" 
+    ON public.daily_statements FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
 
--- Allow public read/write for local demo/development if needed
--- (Uncomment below if using Supabase Anon Key without login for testing)
-/*
-CREATE POLICY "Allow anon read/write for development" 
-    ON public.daily_statements FOR ALL TO anon USING (true) WITH CHECK (true);
-*/
+CREATE POLICY "Allow public full access on cash_memos" 
+    ON public.cash_memos FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
+
+CREATE POLICY "Allow public full access on expense_entries" 
+    ON public.expense_entries FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
 
 -- ==============================================================================
 -- DEFAULT SEED DATA
@@ -138,18 +144,18 @@ VALUES ('00000000-0000-0000-0000-000000000001', 'Restaurant Cash Statement', 'Ma
 ON CONFLICT (id) DO NOTHING;
 
 -- 2. Predefined Common Expense Categories matching paper cash statement
-INSERT INTO public.expense_categories (restaurant_id, name, display_order)
+INSERT INTO public.expense_categories (id, restaurant_id, name, display_order)
 VALUES 
-    ('00000000-0000-0000-0000-000000000001', 'Vegetables / Mandi', 1),
-    ('00000000-0000-0000-0000-000000000001', 'Meat / Poultry / Fish', 2),
-    ('00000000-0000-0000-0000-000000000001', 'Dairy / Milk / Paneer', 3),
-    ('00000000-0000-0000-0000-000000000001', 'Bakery / Breads', 4),
-    ('00000000-0000-0000-0000-000000000001', 'Gas / Commercial Cylinders', 5),
-    ('00000000-0000-0000-0000-000000000001', 'Packaging & Disposables', 6),
-    ('00000000-0000-0000-0000-000000000001', 'Daily Wages / Labour', 7),
-    ('00000000-0000-0000-0000-000000000001', 'Maintenance & Repairs', 8),
-    ('00000000-0000-0000-0000-000000000001', 'Cleaning & Sanitation', 9),
-    ('00000000-0000-0000-0000-000000000001', 'Ice & Beverages', 10),
-    ('00000000-0000-0000-0000-000000000001', 'Staff Tea & Refreshment', 11),
-    ('00000000-0000-0000-0000-000000000001', 'Miscellaneous Cash Expenses', 12)
-ON CONFLICT DO NOTHING;
+    ('11111111-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', 'Vegetables / Mandi', 1),
+    ('11111111-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000001', 'Meat / Poultry / Fish', 2),
+    ('11111111-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000001', 'Dairy / Milk / Paneer', 3),
+    ('11111111-0000-0000-0000-000000000004', '00000000-0000-0000-0000-000000000001', 'Bakery / Breads', 4),
+    ('11111111-0000-0000-0000-000000000005', '00000000-0000-0000-0000-000000000001', 'Gas / Commercial Cylinders', 5),
+    ('11111111-0000-0000-0000-000000000006', '00000000-0000-0000-0000-000000000001', 'Packaging & Disposables', 6),
+    ('11111111-0000-0000-0000-000000000007', '00000000-0000-0000-0000-000000000001', 'Daily Wages / Labour', 7),
+    ('11111111-0000-0000-0000-000000000008', '00000000-0000-0000-0000-000000000001', 'Maintenance & Repairs', 8),
+    ('11111111-0000-0000-0000-000000000009', '00000000-0000-0000-0000-000000000001', 'Cleaning & Sanitation', 9),
+    ('11111111-0000-0000-0000-000000000010', '00000000-0000-0000-0000-000000000001', 'Ice & Beverages', 10),
+    ('11111111-0000-0000-0000-000000000011', '00000000-0000-0000-0000-000000000001', 'Staff Tea & Refreshment', 11),
+    ('11111111-0000-0000-0000-000000000012', '00000000-0000-0000-0000-000000000001', 'Miscellaneous Cash Expenses', 12)
+ON CONFLICT (id) DO NOTHING;
