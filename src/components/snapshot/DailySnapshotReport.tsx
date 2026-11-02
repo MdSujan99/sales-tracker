@@ -294,7 +294,7 @@ export const DailySnapshotReport: React.FC<DailySnapshotReportProps> = ({
         {/* Section 5: Signatures / Handover Block */}
         <div className="pt-6 border-t border-slate-300">
           <div className="mb-6 p-2.5 bg-slate-100 border border-slate-300 rounded text-center text-xs print:bg-white print:border-slate-400">
-            <span className="font-semibold text-slate-700">Closing Cash in Hand for Drawer / Handover: </span>
+            <span className="font-semibold text-slate-700">Closing Cash in Hand (Handover): </span>
             <span className="font-black text-slate-950 text-sm">
               {formatPaiseToINR(
                 statement.cash_in_hand_paise ??

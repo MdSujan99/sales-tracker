@@ -99,15 +99,10 @@ export const ReconciliationBar: React.FC<ReconciliationBarProps> = ({
 
           {/* Cash in Hand (Cash Sales - Expenses) -> Highlighted Hero Card */}
           <div className="bg-gradient-to-br from-emerald-950/70 to-slate-800 p-3 rounded-lg border-2 border-emerald-500/80 shadow-xs relative">
-            <div className="flex items-center justify-between">
-              <span className="text-2xs font-black text-emerald-300 uppercase tracking-wider block flex items-center">
-                <Wallet className="w-3 h-3 mr-1 text-emerald-400" />
-                Cash in Hand
-              </span>
-              <span className="text-3xs font-bold px-1.5 py-0.2 bg-emerald-500/20 text-emerald-300 rounded border border-emerald-500/40">
-                Drawer
-              </span>
-            </div>
+            <span className="text-2xs font-black text-emerald-300 uppercase tracking-wider block flex items-center">
+              <Wallet className="w-3 h-3 mr-1 text-emerald-400" />
+              Cash in Hand
+            </span>
             <span
               className={`text-base sm:text-lg font-black block mt-1 ${
                 cashInHandPaise >= 0 ? 'text-emerald-300' : 'text-rose-400'
