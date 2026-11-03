@@ -1,4 +1,7 @@
-# Logs
+# Test Coverage
+coverage
+*.lcov
+
 logs
 *.log
 npm-debug.log*

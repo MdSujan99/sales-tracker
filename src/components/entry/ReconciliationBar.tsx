@@ -1,7 +1,7 @@
 import React from 'react';
 import type { ReconciliationResult } from '../../types/statement';
 import { formatPaiseToINR } from '../../lib/calculations';
-import { CheckCircle2, AlertTriangle, AlertCircle, Save, Check, Wallet, Banknote, Unlock } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, AlertCircle, Save, Check, Unlock } from 'lucide-react';
 
 interface ReconciliationBarProps {
   totalSalesPaise: number;
@@ -62,8 +62,7 @@ export const ReconciliationBar: React.FC<ReconciliationBarProps> = ({
 
           {/* Cash Sales (Derived) */}
           <div className="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-lg border border-slate-200/80 dark:border-slate-700/80 transition-colors">
-            <span className="text-2xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block flex items-center">
-              <Banknote className="w-3 h-3 mr-1 text-emerald-600 dark:text-emerald-400" />
+            <span className="text-2xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
               Cash Sales
             </span>
             <span
@@ -87,8 +86,7 @@ export const ReconciliationBar: React.FC<ReconciliationBarProps> = ({
 
           {/* Cash in Hand -> Highlighted Hero Card */}
           <div className="bg-emerald-50 dark:bg-emerald-950/40 p-3 rounded-lg border-2 border-emerald-500/80 dark:border-emerald-500/60 shadow-xs relative">
-            <span className="text-2xs font-black text-emerald-800 dark:text-emerald-300 uppercase tracking-wider block flex items-center">
-              <Wallet className="w-3 h-3 mr-1 text-emerald-600 dark:text-emerald-400" />
+            <span className="text-2xs font-black text-emerald-800 dark:text-emerald-300 uppercase tracking-wider block">
               Cash in Hand
             </span>
             <span

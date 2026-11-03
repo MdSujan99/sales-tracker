@@ -170,4 +170,67 @@ describe('Reconciliation & Sanity Checks', () => {
     expect(result.isValid).toBe(false);
     expect(result.errors).toContain('Business date is required.');
   });
+
+  it('detects discrepancies between entered account expenses and calculated expenses', () => {
+    const statement: Partial<DailyStatement> = {
+      business_date: '2026-11-02',
+      entered_account_expenses_paise: 500000, // ₹5,000 on paper
+      expense_entries: [
+        { id: '1', category_name: 'Raw Material', description: '', amount_paise: 400000 }, // ₹4,000 itemized
+      ],
+    };
+    const result = reconcileStatement(statement);
+    expect(result.expenseDiscrepancyPaise).toBe(100000);
+    expect(result.warnings.some(w => w.includes('Entered Account Expenses'))).toBe(true);
+  });
+
+  it('flags error when cash memo amount is negative', () => {
+    const statement: Partial<DailyStatement> = {
+      business_date: '2026-11-02',
+      cash_memos: [
+        { id: '1', from_number: '1', to_number: '10', source: 'Dine-in', amount_paise: -500 },
+      ],
+    };
+    const result = reconcileStatement(statement);
+    expect(result.isValid).toBe(false);
+    expect(result.errors).toContain('Cash memo amount cannot be negative.');
+  });
+
+  it('flags error when an itemized expense amount is negative', () => {
+    const statement: Partial<DailyStatement> = {
+      business_date: '2026-11-02',
+      expense_entries: [
+        { id: '1', category_name: 'Fuel', description: 'Petrol', amount_paise: -10000 },
+      ],
+    };
+    const result = reconcileStatement(statement);
+    expect(result.isValid).toBe(false);
+    expect(result.errors.some(e => e.includes('cannot have a negative amount'))).toBe(true);
+  });
+
+  it('warns when total cash memos exceed total calculated sales', () => {
+    const statement: Partial<DailyStatement> = {
+      business_date: '2026-11-02',
+      cash_sales_paise: 200000, // ₹2,000
+      cash_memos: [
+        { id: '1', from_number: '1', to_number: '10', source: 'Dine-in', amount_paise: 300000 }, // ₹3,000
+      ],
+    };
+    const result = reconcileStatement(statement);
+    expect(result.warnings.some(w => w.includes('Total cash memos'))).toBe(true);
+  });
+
+  it('warns when total sales recorded is 0 on a finalized statement', () => {
+    const statement: Partial<DailyStatement> = {
+      business_date: '2026-11-02',
+      status: 'FINALIZED',
+      total_sales_paise: 0,
+      cash_sales_paise: 0,
+      upi_sales_paise: 0,
+      card_sales_paise: 0,
+      delivery_sales_paise: 0,
+    };
+    const result = reconcileStatement(statement);
+    expect(result.warnings.some(w => w.includes('Total sales recorded is ₹0.00'))).toBe(true);
+  });
 });

@@ -7,6 +7,18 @@ Whenever any change is made to existing code or schema, add an entry with the **
 
 ## Decision Log
 
+### 2026-11-04: Remove Wallet and Banknote Icons from Summary & Reconciliation Grid
+- **Reason**: User requested removing the wallet and currency/banknote icons from the "CASH IN HAND" and "CASH SALES" metric cards for a cleaner, unified typography layout.
+- **Change**: Removed the `<Banknote>` and `<Wallet>` Lucide React icons and cleaned up unused icon imports in [`ReconciliationBar.tsx`](file:///src/components/entry/ReconciliationBar.tsx).
+
+### 2026-11-03: Code Coverage Tooling & Calculation Test Expansion
+- **Reason**: Ensure continuous verification and measurement of test coverage for financial calculations, reconciliation logic, and feature updates.
+- **Change**: Installed `@vitest/coverage-v8`, configured coverage reporter in [`vite.config.ts`](file:///vite.config.ts), added `"test:coverage": "vitest run --coverage"` in [`package.json`](file:///package.json), ignored `coverage/` in [`.gitignore`](file:///.gitignore), and added comprehensive tests in [`calculations.test.ts`](file:///src/tests/calculations.test.ts) covering negative memos/expenses, expense discrepancies, memo overflows, and finalized zero-sales statements.
+
+### 2026-11-03: Date Range Selector in Sales Analysis
+- **Reason**: Enable accountants and restaurant owners to filter sales analytics and trend charts by custom date ranges in addition to default quick filters.
+- **Change**: Added `CUSTOM` range option and date range picker controls (From/To date inputs with range bounds, clear button, and result counter) in [`DashboardAnalytics.tsx`](file:///src/components/dashboard/DashboardAnalytics.tsx).
+
 ### 2026-11-03: Reset Entry Form After Finalizing Statement
 - **Reason**: When finalizing a daily statement, the entry form retained the finalized statement state instead of resetting to a fresh blank entry ready for subsequent records.
 - **Change**: In [`DailyEntryForm.tsx`](file:///src/components/entry/DailyEntryForm.tsx), clear the local draft and reset local state with `createBlankStatement()` upon finalization. In [`App.tsx`](file:///src/App.tsx), reset `activeStatement` to a clean blank draft when a statement is finalized.
