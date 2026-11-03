@@ -240,15 +240,16 @@ export const DailyEntryForm: React.FC<DailyEntryFormProps> = ({
     setIsSaving(false);
 
     if (res.success) {
-      setStatement(finalStatement);
       onStatementSaved(finalStatement);
       if (statusToSet === 'FINALIZED') {
         localStorage.removeItem(LOCAL_DRAFT_KEY);
-        setSaveSuccessMsg('Statement finalized and saved successfully.');
+        setSaveSuccessMsg('Statement finalized and saved successfully. Resetting entry form...');
         setTimeout(() => {
+          setStatement(createBlankStatement());
           onViewSnapshot(finalStatement);
         }, 1200);
       } else {
+        setStatement(finalStatement);
         setSaveSuccessMsg('Draft saved.');
         setTimeout(() => setSaveSuccessMsg(null), 3000);
       }

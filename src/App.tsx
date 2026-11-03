@@ -70,7 +70,47 @@ const MainApp: React.FC = () => {
       }
       return [saved, ...prev];
     });
-    setActiveStatement(saved);
+
+    if (saved.status === 'FINALIZED') {
+      // Create a fresh blank statement for the entry form so it resets
+      const today = new Date().toISOString().split('T')[0];
+      const todayExists = (saved.business_date === today) || statements.some(s => s.business_date === today);
+      let targetDate = today;
+      if (todayExists) {
+        const d = new Date();
+        d.setDate(d.getDate() - 1);
+        targetDate = d.toISOString().split('T')[0];
+      }
+
+      const blank: DailyStatement = {
+        id: generateUuid(),
+        restaurant_id: '00000000-0000-0000-0000-000000000001',
+        business_date: targetDate,
+        statement_number: `ST-${targetDate.slice(2).replace(/-/g, '')}-01`,
+        status: 'DRAFT',
+        cash_sales_paise: 0,
+        upi_sales_paise: 0,
+        card_sales_paise: 0,
+        delivery_sales_paise: 0,
+        other_sales_paise: 0,
+        total_sales_paise: 0,
+        cash_memos: [
+          { id: generateUuid(), from_number: '', to_number: '', source: 'Counter / Dine-in', amount_paise: 0 },
+        ],
+        total_cash_memos_paise: 0,
+        expense_entries: [],
+        total_expenses_paise: 0,
+        net_difference_paise: 0,
+        cash_in_hand_paise: 0,
+        closing_cash_paise: 0,
+        notes: '',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      setActiveStatement(blank);
+    } else {
+      setActiveStatement(saved);
+    }
   };
 
   const handleOpenStatement = (stmt: DailyStatement) => {

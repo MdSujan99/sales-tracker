@@ -7,6 +7,10 @@ Whenever any change is made to existing code or schema, add an entry with the **
 
 ## Decision Log
 
+### 2026-11-03: Reset Entry Form After Finalizing Statement
+- **Reason**: When finalizing a daily statement, the entry form retained the finalized statement state instead of resetting to a fresh blank entry ready for subsequent records.
+- **Change**: In [`DailyEntryForm.tsx`](file:///src/components/entry/DailyEntryForm.tsx), clear the local draft and reset local state with `createBlankStatement()` upon finalization. In [`App.tsx`](file:///src/App.tsx), reset `activeStatement` to a clean blank draft when a statement is finalized.
+
 ### 2026-11-03: Summary & Reconciliation Section Theme Harmonization
 - **Reason**: The "4. Summary & Reconciliation" card was hardcoded with pitch-black `bg-slate-900` and dark-only styles, clashing with the light/dark design system used across Sections 1, 2, and 3.
 - **Change**: Refactored [`ReconciliationBar.tsx`](file:///src/components/entry/ReconciliationBar.tsx) to follow the unified theme palette (`bg-white dark:bg-slate-900` card container, `bg-slate-50 dark:bg-slate-800/60` stat tiles, unified typography hierarchy, theme-adaptive status alerts, and standard light/dark input fields).
